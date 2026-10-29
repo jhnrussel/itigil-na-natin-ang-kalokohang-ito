@@ -1057,7 +1057,7 @@
       <h1>
         <i class="fas fa-book-open"></i>
         AD-CSS 313
-        <span class="badge"><i class="fas fa-graduation-cap"></i> Quiz</span>
+        <span class="badge"><i class="fas fa-graduation-cap"></i>Quiz</span>
       </h1>
       <div class="header-stats">
         <div class="timer-box">
@@ -1111,7 +1111,7 @@
 
       <div id="cableNotice" class="notice-banner">
         <i class="fas fa-info-circle"></i>
-        <div>Wire the cable correctly, then click <strong>Test Cable</strong> and <strong>Submit Part II</strong> to earn points. Your wiring is saved automatically when you switch standards or cable types.</div>
+        <div>Each cable type (Straight-Through / Crossover) has its own saved wiring. Switching between them starts a fresh blank slate unless you return to a type you already worked on.</div>
       </div>
 
       <div class="cable-sim-container">
@@ -1127,7 +1127,7 @@
             <option value="straight">Straight-Through</option>
             <option value="crossover">Crossover</option>
           </select>
-          <button class="clear-sim-btn" id="clearSimBtn"><i class="fas fa-rotate-left"></i> Clear All</button>
+          <button class="clear-sim-btn" id="clearSimBtn"><i class="fas fa-rotate-left"></i> Clear This Cable</button>
         </div>
 
         <!-- Wire Palette -->
@@ -1232,10 +1232,12 @@
       // STORAGE KEYS
       // ============================================================
       const STORAGE_KEYS = {
-        mc: 'adcss313_mc_answers',
-        sit: 'adcss313_sit_answers',
-        cable: 'adcss313_cable_state',
-        submitted: 'adcss313_submitted_flags'
+        mc: 'adcss313_mc_answers_v2',
+        sit: 'adcss313_sit_answers_v2',
+        cableStraight: 'adcss313_cable_straight_v2',
+        cableCrossover: 'adcss313_cable_crossover_v2',
+        submitted: 'adcss313_submitted_flags_v2',
+        settings: 'adcss313_cable_settings_v2'
       };
 
       // ============================================================
@@ -1381,10 +1383,19 @@
       let timerInterval = null;
       let secondsElapsed = 0;
 
+      // Two independent wiring states
+      let straightEndA = new Array(8).fill(null);
+      let straightEndB = new Array(8).fill(null);
+      let crossoverEndA = new Array(8).fill(null);
+      let crossoverEndB = new Array(8).fill(null);
+
+      // Current selected standard (shared) and cable type
       let simStandard = 'T568A';
       let simType = 'straight';
-      let endA = new Array(8).fill(null);
-      let endB = new Array(8).fill(null);
+
+      // Active wires for current type
+      let endA = straightEndA;
+      let endB = straightEndB;
 
       let selectedWire = null;
 
@@ -1393,9 +1404,10 @@
       let submittedCable = false;
       let submittedSit = false;
 
-      // Cable test score (number of correct pins out of 8)
-      let cableScore = 0;
-      let cableMaxScore = 8;
+      // Cable score per type
+      let straightScore = 0;
+      let crossoverScore = 0;
+      let cableScore = 0; // the score used for the submitted cable
 
       // DOM refs
       const container = document.getElementById('questionsContainer');
@@ -1421,77 +1433,116 @@
       // PERSISTENCE HELPERS
       // ============================================================
       function saveMC() {
-        try {
-          localStorage.setItem(STORAGE_KEYS.mc, JSON.stringify(userAnswers));
-        } catch (e) { /* ignore quota errors */ }
+        try { localStorage.setItem(STORAGE_KEYS.mc, JSON.stringify(userAnswers)); } catch (e) {}
       }
-
       function saveSit() {
-        try {
-          localStorage.setItem(STORAGE_KEYS.sit, JSON.stringify(userSituational));
-        } catch (e) { /* ignore */ }
+        try { localStorage.setItem(STORAGE_KEYS.sit, JSON.stringify(userSituational)); } catch (e) {}
       }
-
-      function saveCable() {
+      function saveCableStraight() {
         try {
-          localStorage.setItem(STORAGE_KEYS.cable, JSON.stringify({
-            simStandard, simType, endA, endB, cableScore
+          localStorage.setItem(STORAGE_KEYS.cableStraight, JSON.stringify({
+            endA: straightEndA, endB: straightEndB
           }));
-        } catch (e) { /* ignore */ }
+        } catch (e) {}
       }
-
+      function saveCableCrossover() {
+        try {
+          localStorage.setItem(STORAGE_KEYS.cableCrossover, JSON.stringify({
+            endA: crossoverEndA, endB: crossoverEndB
+          }));
+        } catch (e) {}
+      }
+      function saveSettings() {
+        try {
+          localStorage.setItem(STORAGE_KEYS.settings, JSON.stringify({
+            simStandard, simType
+          }));
+        } catch (e) {}
+      }
       function saveSubmitted() {
         try {
           localStorage.setItem(STORAGE_KEYS.submitted, JSON.stringify({
-            submittedMC, submittedCable, submittedSit
+            submittedMC, submittedCable, submittedSit,
+            straightScore, crossoverScore, cableScore
           }));
-        } catch (e) { /* ignore */ }
+        } catch (e) {}
       }
 
       function loadAll() {
         try {
           const mc = localStorage.getItem(STORAGE_KEYS.mc);
           if (mc) {
-            const parsed = JSON.parse(mc);
-            if (Array.isArray(parsed) && parsed.length === 71) userAnswers = parsed;
+            const p = JSON.parse(mc);
+            if (Array.isArray(p) && p.length === 71) userAnswers = p;
           }
-        } catch (e) { /* ignore */ }
+        } catch (e) {}
 
         try {
           const sit = localStorage.getItem(STORAGE_KEYS.sit);
           if (sit) {
-            const parsed = JSON.parse(sit);
-            if (Array.isArray(parsed) && parsed.length === 5) userSituational = parsed;
+            const p = JSON.parse(sit);
+            if (Array.isArray(p) && p.length === 5) userSituational = p;
           }
-        } catch (e) { /* ignore */ }
+        } catch (e) {}
 
         try {
-          const cable = localStorage.getItem(STORAGE_KEYS.cable);
-          if (cable) {
-            const parsed = JSON.parse(cable);
-            if (parsed.simStandard) simStandard = parsed.simStandard;
-            if (parsed.simType) simType = parsed.simType;
-            if (Array.isArray(parsed.endA) && parsed.endA.length === 8) endA = parsed.endA;
-            if (Array.isArray(parsed.endB) && parsed.endB.length === 8) endB = parsed.endB;
-            if (typeof parsed.cableScore === 'number') cableScore = parsed.cableScore;
+          const ss = localStorage.getItem(STORAGE_KEYS.cableStraight);
+          if (ss) {
+            const p = JSON.parse(ss);
+            if (Array.isArray(p.endA) && p.endA.length === 8) straightEndA = p.endA;
+            if (Array.isArray(p.endB) && p.endB.length === 8) straightEndB = p.endB;
           }
-        } catch (e) { /* ignore */ }
+        } catch (e) {}
 
         try {
-          const submitted = localStorage.getItem(STORAGE_KEYS.submitted);
-          if (submitted) {
-            const parsed = JSON.parse(submitted);
-            submittedMC = !!parsed.submittedMC;
-            submittedCable = !!parsed.submittedCable;
-            submittedSit = !!parsed.submittedSit;
+          const sc = localStorage.getItem(STORAGE_KEYS.cableCrossover);
+          if (sc) {
+            const p = JSON.parse(sc);
+            if (Array.isArray(p.endA) && p.endA.length === 8) crossoverEndA = p.endA;
+            if (Array.isArray(p.endB) && p.endB.length === 8) crossoverEndB = p.endB;
           }
-        } catch (e) { /* ignore */ }
+        } catch (e) {}
+
+        try {
+          const s = localStorage.getItem(STORAGE_KEYS.settings);
+          if (s) {
+            const p = JSON.parse(s);
+            if (p.simStandard) simStandard = p.simStandard;
+            if (p.simType) simType = p.simType;
+          }
+        } catch (e) {}
+
+        try {
+          const sub = localStorage.getItem(STORAGE_KEYS.submitted);
+          if (sub) {
+            const p = JSON.parse(sub);
+            submittedMC = !!p.submittedMC;
+            submittedCable = !!p.submittedCable;
+            submittedSit = !!p.submittedSit;
+            if (typeof p.straightScore === 'number') straightScore = p.straightScore;
+            if (typeof p.crossoverScore === 'number') crossoverScore = p.crossoverScore;
+            if (typeof p.cableScore === 'number') cableScore = p.cableScore;
+          }
+        } catch (e) {}
       }
 
       function clearAllStorage() {
-        try {
-          Object.values(STORAGE_KEYS).forEach(k => localStorage.removeItem(k));
-        } catch (e) { /* ignore */ }
+        try { Object.values(STORAGE_KEYS).forEach(k => localStorage.removeItem(k)); } catch (e) {}
+      }
+
+      // ============================================================
+      // SWITCH ACTIVE CABLE
+      // ============================================================
+      function setActiveCable(type) {
+        simType = type;
+        if (type === 'straight') {
+          endA = straightEndA;
+          endB = straightEndB;
+        } else {
+          endA = crossoverEndA;
+          endB = crossoverEndB;
+        }
+        saveSettings();
       }
 
       // ============================================================
@@ -1513,7 +1564,6 @@
       document.querySelectorAll('.tab-btn').forEach(btn => {
         btn.addEventListener('click', () => {
           const tabId = btn.dataset.tab;
-          // Prevent opening Part III if locked
           if (tabId === 'tab-sit' && !submittedMC) {
             sitLockedNotice.style.display = 'flex';
             switchTab('tab-sit');
@@ -1642,11 +1692,8 @@
           token.addEventListener('click', (e) => {
             e.stopPropagation();
             const wire = token.dataset.wire;
-            if (selectedWire === wire) {
-              selectedWire = null;
-            } else {
-              selectedWire = wire;
-            }
+            if (selectedWire === wire) selectedWire = null;
+            else selectedWire = wire;
             renderPalette();
             updateClickTargets();
           });
@@ -1655,11 +1702,8 @@
 
       function updateClickTargets() {
         document.querySelectorAll('.pin-dropzone').forEach(dz => {
-          if (selectedWire) {
-            dz.classList.add('click-target');
-          } else {
-            dz.classList.remove('click-target');
-          }
+          if (selectedWire) dz.classList.add('click-target');
+          else dz.classList.remove('click-target');
         });
       }
 
@@ -1743,14 +1787,14 @@
 
             if (end === 'A' && endA[pin] !== null) {
               endA[pin] = null;
-              saveCable();
+              saveCurrentCable();
               renderConnectors();
               renderPalette();
               resetLeds();
               document.getElementById('simMessage').textContent = '';
             } else if (end === 'B' && endB[pin] !== null) {
               endB[pin] = null;
-              saveCable();
+              saveCurrentCable();
               renderConnectors();
               renderPalette();
               resetLeds();
@@ -1771,7 +1815,7 @@
         if (end === 'A') endA[pin] = wire;
         else endB[pin] = wire;
 
-        saveCable();
+        saveCurrentCable();
         resetLeds();
         document.getElementById('simMessage').textContent = '';
         renderConnectors();
@@ -1788,6 +1832,11 @@
         const wire = e.dataTransfer.getData('text/plain');
         if (!wire) return;
         placeWire(end, pin, wire);
+      }
+
+      function saveCurrentCable() {
+        if (simType === 'straight') saveCableStraight();
+        else saveCableCrossover();
       }
 
       function resetLeds() {
@@ -1816,7 +1865,6 @@
         ledsContainer.innerHTML = html;
       }
 
-      // Test cable: runs on every pin, shows per-pin errors
       function testCable() {
         const expectedA = getExpectedEndA();
         const expectedB = getExpectedEndB();
@@ -1877,19 +1925,31 @@
         }
       }
 
-      function clearSimulator() {
-        endA = new Array(8).fill(null);
-        endB = new Array(8).fill(null);
+      function clearActiveCable() {
+        if (simType === 'straight') {
+          straightEndA = new Array(8).fill(null);
+          straightEndB = new Array(8).fill(null);
+          endA = straightEndA;
+          endB = straightEndB;
+          saveCableStraight();
+        } else {
+          crossoverEndA = new Array(8).fill(null);
+          crossoverEndB = new Array(8).fill(null);
+          endA = crossoverEndA;
+          endB = crossoverEndB;
+          saveCableCrossover();
+        }
         selectedWire = null;
-        cableScore = 0;
         resetLeds();
         document.getElementById('simMessage').textContent = '';
         renderPalette();
         renderConnectors();
-        saveCable();
       }
 
       function initSimulator() {
+        // Set initial active cable based on simType
+        setActiveCable(simType);
+
         document.getElementById('simStandard').value = simStandard;
         document.getElementById('simType').value = simType;
 
@@ -1899,26 +1959,31 @@
 
         document.getElementById('simStandard').addEventListener('change', (e) => {
           simStandard = e.target.value;
-          // Do NOT clear wires — they are preserved and saved
-          saveCable();
+          saveSettings();
           resetLeds();
           renderConnectors();
           renderPalette();
-          cableNotice.innerHTML = '<i class="fas fa-info-circle"></i><div>Standard changed to <strong>' + simStandard + '</strong>. Your wiring is preserved. Test and submit again if needed.</div>';
           cableNotice.className = 'notice-banner';
+          cableNotice.innerHTML = '<i class="fas fa-info-circle"></i><div>Standard changed to <strong>' + simStandard + '</strong>. Wiring is preserved for the current cable type.</div>';
         });
 
         document.getElementById('simType').addEventListener('change', (e) => {
-          simType = e.target.value;
-          saveCable();
+          // Save current before switching
+          saveCurrentCable();
+          // Switch to the other cable's state
+          setActiveCable(e.target.value);
           resetLeds();
           renderConnectors();
           renderPalette();
-          cableNotice.innerHTML = '<i class="fas fa-info-circle"></i><div>Cable type changed to <strong>' + (simType === 'straight' ? 'Straight-Through' : 'Crossover') + '</strong>. Your wiring is preserved.</div>';
+          document.getElementById('simMessage').textContent = '';
           cableNotice.className = 'notice-banner';
+          cableNotice.innerHTML = '<i class="fas fa-info-circle"></i><div>Switched to <strong>' + (simType === 'straight' ? 'Straight-Through' : 'Crossover') + '</strong>. ' +
+            (endA.some(w => w !== null) || endB.some(w => w !== null)
+              ? 'Previous work for this type has been restored.'
+              : 'This cable is blank — start wiring!') + '</div>';
         });
 
-        document.getElementById('clearSimBtn').addEventListener('click', clearSimulator);
+        document.getElementById('clearSimBtn').addEventListener('click', clearActiveCable);
         document.getElementById('testBtn').addEventListener('click', testCable);
 
         document.addEventListener('click', (e) => {
@@ -2000,33 +2065,25 @@
         submittedMC = true;
         saveSubmitted();
         updateCounters();
-        // Unlock Part III tab visual
         sitTabBtn.classList.remove('locked');
         sitLockedNotice.style.display = 'none';
-        // Disable MC radios
         container.querySelectorAll('input[type="radio"]').forEach(r => r.disabled = true);
         document.getElementById('submitMCBtn').disabled = true;
-        // Show notice
         const notice = document.createElement('div');
         notice.className = 'notice-banner success';
         notice.innerHTML = '<i class="fas fa-circle-check"></i><div>Part I submitted successfully. You can now proceed to Part III.</div>';
         const mcPanel = document.getElementById('tab-mc');
-        const oldNotice = mcPanel.querySelector('.notice-banner');
-        if (oldNotice) oldNotice.remove();
+        const old = mcPanel.querySelector('.notice-banner');
+        if (old) old.remove();
         mcPanel.insertBefore(notice, mcPanel.querySelector('.section-title'));
-        // Auto-advance to Part II if not yet submitted
-        if (!submittedCable) {
-          setTimeout(() => switchTab('tab-cable'), 600);
-        } else {
-          setTimeout(() => switchTab('tab-sit'), 600);
-        }
+        if (!submittedCable) setTimeout(() => switchTab('tab-cable'), 600);
+        else setTimeout(() => switchTab('tab-sit'), 600);
       }
 
       // ============================================================
-      // SUBMIT PART II (Cable)
+      // SUBMIT PART II
       // ============================================================
       function submitCable() {
-        // Run the tester to compute the score
         const expectedA = getExpectedEndA();
         const expectedB = getExpectedEndB();
         let correct = 0;
@@ -2040,14 +2097,16 @@
           if (continuity && standardA && standardB) correct++;
         }
         cableScore = correct;
-        cableMaxScore = 8;
+
+        if (simType === 'straight') straightScore = correct;
+        else crossoverScore = correct;
+
         submittedCable = true;
-        saveCable();
         saveSubmitted();
+        saveCurrentCable();
         updateCounters();
 
-        // Update notice
-        const pct = Math.round((cableScore / cableMaxScore) * 100);
+        const pct = Math.round((cableScore / 8) * 100);
         let cls = 'notice-banner success';
         let icon = 'fa-circle-check';
         let msgText = '';
@@ -2056,51 +2115,29 @@
         } else if (pct >= 50) {
           cls = 'notice-banner';
           icon = 'fa-triangle-exclamation';
-          msgText = `<strong>Partial score:</strong> ${cableScore}/8 pins correct (${pct}%). Review the red LEDs and try again — but this attempt is now recorded.`;
+          msgText = `<strong>Partial score:</strong> ${cableScore}/8 pins correct (${pct}%). Review the red LEDs. This attempt has been recorded.`;
         } else {
           cls = 'notice-banner danger';
           icon = 'fa-circle-xmark';
-          msgText = `<strong>Low score:</strong> Only ${cableScore}/8 pins correct (${pct}%). Review the red LEDs to see which pins are wrong.`;
-        }
-        if (pct < 100) {
-          msgText += ' <em>(Tip: You can still adjust the wiring and submit again before proceeding to Part III — only the latest submission counts.)</em>';
-          // Allow re-submission if not perfect
+          msgText = `<strong>Low score:</strong> Only ${cableScore}/8 pins correct (${pct}%). Review the red LEDs. This attempt has been recorded.`;
         }
         cableNotice.className = cls;
-        cableNotice.innerHTML = `<i class="fas ${icon}"></i><div>${msgText}</div>`;
+        cableNotice.innerHTML = `<i class="fas ${icon}"></i><div>${msgText} <em>(Tip: You can adjust the wiring and submit again — only the latest submission counts.)</em></div>`;
 
-        // Disable cable controls if perfect OR if already moving on
-        if (pct === 100) {
-          document.getElementById('submitCableBtn').disabled = true;
-          document.getElementById('testBtn').disabled = true;
-          document.getElementById('simStandard').disabled = true;
-          document.getElementById('simType').disabled = true;
-          document.getElementById('clearSimBtn').disabled = true;
-        }
-
-        // Auto-advance to Part III if Part I already submitted, otherwise prompt
-        if (submittedMC) {
-          setTimeout(() => switchTab('tab-sit'), 800);
-        } else {
-          setTimeout(() => switchTab('tab-mc'), 800);
-        }
+        if (submittedMC) setTimeout(() => switchTab('tab-sit'), 800);
+        else setTimeout(() => switchTab('tab-mc'), 800);
       }
 
       // ============================================================
       // SUBMIT PART III
       // ============================================================
       function submitSit() {
-        if (!submittedMC) {
-          alert('Please submit Part I first.');
-          return;
-        }
+        if (!submittedMC) { alert('Please submit Part I first.'); return; }
         submittedSit = true;
         saveSubmitted();
         updateCounters();
         situationalContainer.querySelectorAll('input[type="radio"]').forEach(r => r.disabled = true);
         document.getElementById('submitSitBtn').disabled = true;
-
-        // Show all results
         updateResultTab();
         switchTab('tab-result');
       }
@@ -2119,7 +2156,6 @@
         resultSection.style.display = 'block';
         noResultMsg.style.display = 'none';
 
-        // Compute scores
         let mcCorrect = 0;
         for (let i = 0; i < 71; i++) {
           if (userAnswers[i] === null) continue;
@@ -2144,14 +2180,12 @@
           <span><i class="fas fa-lightbulb"></i> Part III: <strong>${sitCorrect}/5</strong></span>
         `;
 
-        // Answer key
         let keyHtml = '';
         for (let i = 0; i < 71; i++) {
           keyHtml += `<span class="answer-item">${i+1}. ${answerKey[i]}</span>`;
         }
         answerKeyGrid.innerHTML = keyHtml;
 
-        // Review of incorrect
         let html = '';
         for (let i = 0; i < 71; i++) {
           const userAns = userAnswers[i];
@@ -2194,7 +2228,6 @@
           }
         }
 
-        // Cable review
         if (submittedCable) {
           const expectedA = getExpectedEndA();
           const expectedB = getExpectedEndB();
@@ -2205,9 +2238,7 @@
             const expA = expectedA[i];
             const expB = expectedB[i];
             const ok = wireA !== null && wireB !== null && wireA === wireB && wireA === expA && wireB === expB;
-            if (!ok) {
-              cableErrors.push({ pin: i+1, wireA, wireB, expA, expB });
-            }
+            if (!ok) cableErrors.push({ pin: i+1, wireA, wireB, expA, expB });
           }
           if (cableErrors.length > 0) {
             html += `<div style="margin-top:1rem;"><h4 style="font-weight:700; color:#0c3d56; margin-bottom:0.5rem;"><i class="fas fa-ethernet"></i> Cable Simulator — Incorrect Pins</h4></div>`;
@@ -2245,17 +2276,22 @@
 
         userAnswers = new Array(71).fill(null);
         userSituational = new Array(5).fill(null);
+        straightEndA = new Array(8).fill(null);
+        straightEndB = new Array(8).fill(null);
+        crossoverEndA = new Array(8).fill(null);
+        crossoverEndB = new Array(8).fill(null);
         simStandard = 'T568A';
         simType = 'straight';
-        endA = new Array(8).fill(null);
-        endB = new Array(8).fill(null);
+        endA = straightEndA;
+        endB = straightEndB;
         selectedWire = null;
         cableScore = 0;
+        straightScore = 0;
+        crossoverScore = 0;
         submittedMC = false;
         submittedCable = false;
         submittedSit = false;
 
-        // Reset UI
         document.getElementById('simStandard').value = 'T568A';
         document.getElementById('simType').value = 'straight';
         document.getElementById('simStandard').disabled = false;
@@ -2274,12 +2310,10 @@
         document.getElementById('simMessage').textContent = '';
 
         cableNotice.className = 'notice-banner';
-        cableNotice.innerHTML = '<i class="fas fa-info-circle"></i><div>Wire the cable correctly, then click <strong>Test Cable</strong> and <strong>Submit Part II</strong> to earn points. Your wiring is saved automatically when you switch standards or cable types.</div>';
+        cableNotice.innerHTML = '<i class="fas fa-info-circle"></i><div>Each cable type (Straight-Through / Crossover) has its own saved wiring. Switching between them starts a fresh blank slate unless you return to a type you already worked on.</div>';
 
-        // Remove MC/Sit notices
         document.querySelectorAll('.tab-panel .notice-banner').forEach(n => n.remove());
 
-        // Reset tab locks
         sitTabBtn.classList.add('locked');
         sitLockedNotice.style.display = 'none';
 
@@ -2305,12 +2339,14 @@
       function init() {
         loadAll();
 
+        // Set active cable from saved settings
+        setActiveCable(simType);
+
         renderQuestions();
         renderSituational();
         initSimulator();
         renderTesterLeds();
 
-        // Restore submitted states
         if (submittedMC) {
           container.querySelectorAll('input[type="radio"]').forEach(r => r.disabled = true);
           document.getElementById('submitMCBtn').disabled = true;
@@ -2319,8 +2355,8 @@
           notice.className = 'notice-banner success';
           notice.innerHTML = '<i class="fas fa-circle-check"></i><div>Part I was already submitted. You can review your answers but cannot change them.</div>';
           const mcPanel = document.getElementById('tab-mc');
-          const oldNotice = mcPanel.querySelector('.notice-banner');
-          if (oldNotice) oldNotice.remove();
+          const old = mcPanel.querySelector('.notice-banner');
+          if (old) old.remove();
           mcPanel.insertBefore(notice, mcPanel.querySelector('.section-title'));
         }
         if (submittedCable) {
@@ -2335,15 +2371,10 @@
         updateCounters();
         startTimer();
 
-        // Submit buttons
         document.getElementById('submitMCBtn').addEventListener('click', submitMC);
         document.getElementById('submitCableBtn').addEventListener('click', submitCable);
         document.getElementById('submitSitBtn').addEventListener('click', submitSit);
-        document.getElementById('resetBtn2') && document.getElementById('resetBtn2').addEventListener('click', resetQuiz);
 
-        // Add reset button to global actions (already in HTML footer? No — add one)
-        const actionsContainer = document.querySelector('.tab-panel.active .actions');
-        // We'll add a global reset button below the tab panels
         const footerActions = document.createElement('div');
         footerActions.className = 'actions';
         footerActions.style.marginTop = '0.5rem';
@@ -2351,7 +2382,6 @@
         document.querySelector('.quiz-container').appendChild(footerActions);
         document.getElementById('resetBtn2').addEventListener('click', resetQuiz);
 
-        // If already submitted all, show results tab content
         if (submittedMC && submittedCable && submittedSit) {
           updateResultTab();
         }
