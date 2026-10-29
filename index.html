@@ -1105,19 +1105,18 @@
     <!-- ========== TAB 2: CABLE SIMULATOR ========== -->
     <div id="tab-cable" class="tab-panel">
       <div class="section-title">
-        <i class="fas fa-ethernet"></i> Part II — Cable Wiring Simulator
-        <span class="section-badge">T568A / T568B</span>
+        <i class="fas fa-ethernet"></i> Part II — Cable Wiring Simulator        <span class="section-badge">T568A / T568B</span>
       </div>
 
       <div id="cableNotice" class="notice-banner">
         <i class="fas fa-info-circle"></i>
-        <div>Each cable type (Straight-Through / Crossover) has its own saved wiring. Switching between them starts a fresh blank slate unless you return to a type you already worked on.</div>
+        <div>Each cable type has its own saved wiring. For <strong>crossover</strong>, End A uses the selected standard and End B uses the <em>opposite</em> standard.</div>
       </div>
 
       <div class="cable-sim-container">
         <!-- Controls -->
         <div class="sim-controls">
-          <label for="simStandard"><i class="fas fa-tag"></i> Standard:</label>
+          <label for="simStandard"><i class="fas fa-tag"></i> Standard (End A):</label>
           <select id="simStandard">
             <option value="T568A">T568A</option>
             <option value="T568B">T568B</option>
@@ -1232,12 +1231,12 @@
       // STORAGE KEYS
       // ============================================================
       const STORAGE_KEYS = {
-        mc: 'adcss313_mc_answers_v2',
-        sit: 'adcss313_sit_answers_v2',
-        cableStraight: 'adcss313_cable_straight_v2',
-        cableCrossover: 'adcss313_cable_crossover_v2',
-        submitted: 'adcss313_submitted_flags_v2',
-        settings: 'adcss313_cable_settings_v2'
+        mc: 'adcss313_mc_answers_v3',
+        sit: 'adcss313_sit_answers_v3',
+        cableStraight: 'adcss313_cable_straight_v3',
+        cableCrossover: 'adcss313_cable_crossover_v3',
+        submitted: 'adcss313_submitted_flags_v3',
+        settings: 'adcss313_cable_settings_v3'
       };
 
       // ============================================================
@@ -1383,31 +1382,24 @@
       let timerInterval = null;
       let secondsElapsed = 0;
 
-      // Two independent wiring states
       let straightEndA = new Array(8).fill(null);
       let straightEndB = new Array(8).fill(null);
       let crossoverEndA = new Array(8).fill(null);
       let crossoverEndB = new Array(8).fill(null);
 
-      // Current selected standard (shared) and cable type
       let simStandard = 'T568A';
       let simType = 'straight';
 
-      // Active wires for current type
       let endA = straightEndA;
       let endB = straightEndB;
 
       let selectedWire = null;
 
-      // Submission flags
       let submittedMC = false;
       let submittedCable = false;
       let submittedSit = false;
 
-      // Cable score per type
-      let straightScore = 0;
-      let crossoverScore = 0;
-      let cableScore = 0; // the score used for the submitted cable
+      let cableScore = 0;
 
       // DOM refs
       const container = document.getElementById('questionsContainer');
@@ -1430,7 +1422,7 @@
       const cableNotice = document.getElementById('cableNotice');
 
       // ============================================================
-      // PERSISTENCE HELPERS
+      // PERSISTENCE
       // ============================================================
       function saveMC() {
         try { localStorage.setItem(STORAGE_KEYS.mc, JSON.stringify(userAnswers)); } catch (e) {}
@@ -1440,30 +1432,23 @@
       }
       function saveCableStraight() {
         try {
-          localStorage.setItem(STORAGE_KEYS.cableStraight, JSON.stringify({
-            endA: straightEndA, endB: straightEndB
-          }));
+          localStorage.setItem(STORAGE_KEYS.cableStraight, JSON.stringify({ endA: straightEndA, endB: straightEndB }));
         } catch (e) {}
       }
       function saveCableCrossover() {
         try {
-          localStorage.setItem(STORAGE_KEYS.cableCrossover, JSON.stringify({
-            endA: crossoverEndA, endB: crossoverEndB
-          }));
+          localStorage.setItem(STORAGE_KEYS.cableCrossover, JSON.stringify({ endA: crossoverEndA, endB: crossoverEndB }));
         } catch (e) {}
       }
       function saveSettings() {
         try {
-          localStorage.setItem(STORAGE_KEYS.settings, JSON.stringify({
-            simStandard, simType
-          }));
+          localStorage.setItem(STORAGE_KEYS.settings, JSON.stringify({ simStandard, simType }));
         } catch (e) {}
       }
       function saveSubmitted() {
         try {
           localStorage.setItem(STORAGE_KEYS.submitted, JSON.stringify({
-            submittedMC, submittedCable, submittedSit,
-            straightScore, crossoverScore, cableScore
+            submittedMC, submittedCable, submittedSit, cableScore
           }));
         } catch (e) {}
       }
@@ -1476,7 +1461,6 @@
             if (Array.isArray(p) && p.length === 71) userAnswers = p;
           }
         } catch (e) {}
-
         try {
           const sit = localStorage.getItem(STORAGE_KEYS.sit);
           if (sit) {
@@ -1484,7 +1468,6 @@
             if (Array.isArray(p) && p.length === 5) userSituational = p;
           }
         } catch (e) {}
-
         try {
           const ss = localStorage.getItem(STORAGE_KEYS.cableStraight);
           if (ss) {
@@ -1493,7 +1476,6 @@
             if (Array.isArray(p.endB) && p.endB.length === 8) straightEndB = p.endB;
           }
         } catch (e) {}
-
         try {
           const sc = localStorage.getItem(STORAGE_KEYS.cableCrossover);
           if (sc) {
@@ -1502,7 +1484,6 @@
             if (Array.isArray(p.endB) && p.endB.length === 8) crossoverEndB = p.endB;
           }
         } catch (e) {}
-
         try {
           const s = localStorage.getItem(STORAGE_KEYS.settings);
           if (s) {
@@ -1511,7 +1492,6 @@
             if (p.simType) simType = p.simType;
           }
         } catch (e) {}
-
         try {
           const sub = localStorage.getItem(STORAGE_KEYS.submitted);
           if (sub) {
@@ -1519,8 +1499,6 @@
             submittedMC = !!p.submittedMC;
             submittedCable = !!p.submittedCable;
             submittedSit = !!p.submittedSit;
-            if (typeof p.straightScore === 'number') straightScore = p.straightScore;
-            if (typeof p.crossoverScore === 'number') crossoverScore = p.crossoverScore;
             if (typeof p.cableScore === 'number') cableScore = p.cableScore;
           }
         } catch (e) {}
@@ -1555,10 +1533,7 @@
         const panel = document.getElementById(tabId);
         if (btn) btn.classList.add('active');
         if (panel) panel.classList.add('active');
-
-        if (tabId === 'tab-result') {
-          updateResultTab();
-        }
+        if (tabId === 'tab-result') updateResultTab();
       }
 
       document.querySelectorAll('.tab-btn').forEach(btn => {
@@ -1592,7 +1567,6 @@
               </div>
             `;
           }).join('');
-
           html += `
             <div class="question-card" data-qidx="${idx}">
               <div class="q-header">
@@ -1622,7 +1596,6 @@
               </div>
             `;
           }).join('');
-
           html += `
             <div class="question-card" data-sitidx="${idx}">
               <div class="q-header">
@@ -1637,16 +1610,20 @@
       }
 
       // ============================================================
-      // CABLE SIMULATOR
+      // CABLE LOGIC (CORRECTED)
       // ============================================================
       function getStandardColors(std) {
         return std === 'T568A' ? t568aColors : t568bColors;
       }
 
+      // End A always uses the selected standard
       function getExpectedEndA() {
         return getStandardColors(simStandard).map(w => w.color);
       }
 
+      // End B:
+      // - Straight: same standard as End A
+      // - Crossover: opposite standard from End A
       function getExpectedEndB() {
         if (simType === 'straight') {
           return getStandardColors(simStandard).map(w => w.color);
@@ -1893,11 +1870,15 @@
           }
           anyFilled = true;
 
-          const continuity = wireA === wireB;
+          // For crossover, the wires at the same pin are SUPPOSED to be different
+          // (e.g., pin 1: A=White/Green, B=White/Orange).
+          // So continuity here means: does the wire at pin i on A match the expected T568A color,
+          // and does the wire at pin i on B match the expected T568B color?
+          // We do NOT require wireA === wireB for crossover.
           const standardA = wireA === expectedA[i];
           const standardB = wireB === expectedB[i];
 
-          if (continuity && standardA && standardB) {
+          if (standardA && standardB) {
             led.classList.add('lit');
             icon.className = 'led-icon fas fa-check';
             detail.textContent = 'OK';
@@ -1906,7 +1887,6 @@
             icon.className = 'led-icon fas fa-xmark';
             allCorrect = false;
             let errParts = [];
-            if (!continuity) errParts.push('A≠B');
             if (!standardA) errParts.push('A wrong');
             if (!standardB) errParts.push('B wrong');
             detail.textContent = errParts.join(', ');
@@ -1947,7 +1927,6 @@
       }
 
       function initSimulator() {
-        // Set initial active cable based on simType
         setActiveCable(simType);
 
         document.getElementById('simStandard').value = simStandard;
@@ -1968,9 +1947,7 @@
         });
 
         document.getElementById('simType').addEventListener('change', (e) => {
-          // Save current before switching
           saveCurrentCable();
-          // Switch to the other cable's state
           setActiveCable(e.target.value);
           resetLeds();
           renderConnectors();
@@ -2091,16 +2068,9 @@
           const wireA = endA[i];
           const wireB = endB[i];
           if (wireA === null || wireB === null) continue;
-          const continuity = wireA === wireB;
-          const standardA = wireA === expectedA[i];
-          const standardB = wireB === expectedB[i];
-          if (continuity && standardA && standardB) correct++;
+          if (wireA === expectedA[i] && wireB === expectedB[i]) correct++;
         }
         cableScore = correct;
-
-        if (simType === 'straight') straightScore = correct;
-        else crossoverScore = correct;
-
         submittedCable = true;
         saveSubmitted();
         saveCurrentCable();
@@ -2237,7 +2207,7 @@
             const wireB = endB[i];
             const expA = expectedA[i];
             const expB = expectedB[i];
-            const ok = wireA !== null && wireB !== null && wireA === wireB && wireA === expA && wireB === expB;
+            const ok = wireA !== null && wireB !== null && wireA === expA && wireB === expB;
             if (!ok) cableErrors.push({ pin: i+1, wireA, wireB, expA, expB });
           }
           if (cableErrors.length > 0) {
@@ -2286,8 +2256,6 @@
         endB = straightEndB;
         selectedWire = null;
         cableScore = 0;
-        straightScore = 0;
-        crossoverScore = 0;
         submittedMC = false;
         submittedCable = false;
         submittedSit = false;
@@ -2310,7 +2278,7 @@
         document.getElementById('simMessage').textContent = '';
 
         cableNotice.className = 'notice-banner';
-        cableNotice.innerHTML = '<i class="fas fa-info-circle"></i><div>Each cable type (Straight-Through / Crossover) has its own saved wiring. Switching between them starts a fresh blank slate unless you return to a type you already worked on.</div>';
+        cableNotice.innerHTML = '<i class="fas fa-info-circle"></i><div>Each cable type has its own saved wiring. For <strong>crossover</strong>, End A uses the selected standard and End B uses the <em>opposite</em> standard.</div>';
 
         document.querySelectorAll('.tab-panel .notice-banner').forEach(n => n.remove());
 
@@ -2338,8 +2306,6 @@
       // ============================================================
       function init() {
         loadAll();
-
-        // Set active cable from saved settings
         setActiveCable(simType);
 
         renderQuestions();
