@@ -25,17 +25,174 @@
       --text: #102c3b;
       --text-muted: #4f6d7e;
       --border: #cbdae6;
+      --header-h: 72px;
     }
 
     body {
       background: linear-gradient(145deg, #eef2f7 0%, #d9e2ef 100%);
       min-height: 100vh;
-      padding: 1rem 0.8rem 2rem;
+      padding: calc(var(--header-h) + 1rem) 0.8rem 2rem;
       display: flex;
       flex-direction: column;
       align-items: center;
     }
 
+    /* ---------- STICKY HEADER ---------- */
+    .sticky-header {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 1000;
+      background: rgba(255, 255, 255, 0.92);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      border-bottom: 1px solid rgba(200, 220, 235, 0.8);
+      box-shadow: 0 8px 30px -8px rgba(0, 20, 30, 0.25);
+      transition: box-shadow 0.2s, background 0.2s;
+    }
+
+    .sticky-header.scrolled {
+      background: rgba(255, 255, 255, 0.98);
+      box-shadow: 0 10px 34px -8px rgba(0, 20, 30, 0.35);
+    }
+
+    .sticky-inner {
+      max-width: 1000px;
+      margin: 0 auto;
+      padding: 0.5rem 1rem;
+      display: flex;
+      align-items: center;
+      gap: 0.8rem;
+      flex-wrap: wrap;
+      min-height: var(--header-h);
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-weight: 800;
+      color: var(--primary-dark);
+      font-size: 1.05rem;
+      letter-spacing: -0.01em;
+      white-space: nowrap;
+    }
+
+    .brand i {
+      color: var(--primary);
+      font-size: 1.2rem;
+    }
+
+    .brand .brand-badge {
+      background: var(--primary);
+      color: white;
+      font-size: 0.6rem;
+      font-weight: 700;
+      padding: 0.2rem 0.6rem;
+      border-radius: 30px;
+      letter-spacing: 0.3px;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.25rem;
+    }
+
+    .header-progress {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      flex-wrap: wrap;
+      margin-left: auto;
+    }
+
+    .hpill {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      font-size: 0.72rem;
+      font-weight: 700;
+      padding: 0.32rem 0.7rem;
+      border-radius: 30px;
+      background: #eaf1f7;
+      color: var(--primary);
+      border: 1.5px solid #cfe0ee;
+      white-space: nowrap;
+      transition: all 0.2s;
+    }
+
+    .hpill i {
+      font-size: 0.75rem;
+      color: var(--primary-light);
+    }
+
+    .hpill .hpill-count {
+      background: rgba(30, 74, 107, 0.1);
+      padding: 0.02rem 0.4rem;
+      border-radius: 20px;
+      font-size: 0.68rem;
+    }
+
+    .hpill.done {
+      background: #e9f7ef;
+      border-color: #a3d9b1;
+      color: var(--success);
+    }
+
+    .hpill.done i {
+      color: var(--success);
+    }
+
+    .hpill.done .hpill-count {
+      background: rgba(27, 140, 74, 0.12);
+    }
+
+    .hpill.locked {
+      opacity: 0.55;
+    }
+
+    .header-timer {
+      background: #1e3b4b;
+      color: #d4edff;
+      font-weight: 700;
+      font-size: 0.85rem;
+      padding: 0.32rem 0.9rem;
+      border-radius: 60px;
+      font-variant-numeric: tabular-nums;
+      letter-spacing: 0.8px;
+      border: 1px solid #5d8aa0;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      white-space: nowrap;
+      transition: background 0.2s;
+    }
+
+    .header-timer i {
+      color: #f1c40f;
+    }
+
+    .header-timer span {
+      background: #2f6580;
+      border-radius: 30px;
+      padding: 0.1rem 0.55rem;
+      color: white;
+      font-size: 0.85rem;
+    }
+
+    .header-timer.stopped {
+      background: #3d566e;
+      border-color: #5d8aa0;
+    }
+
+    .header-timer.stopped i {
+      color: #95a5a6;
+    }
+
+    .header-timer.stopped span {
+      background: #2c3e50;
+    }
+
+    /* ---------- MAIN CONTAINER ---------- */
     .quiz-container {
       max-width: 1000px;
       width: 100%;
@@ -44,82 +201,8 @@
       -webkit-backdrop-filter: blur(10px);
       border-radius: 2rem;
       box-shadow: 0 30px 60px -15px rgba(0, 20, 30, 0.3), inset 0 1px 3px rgba(255, 255, 255, 0.9);
-      padding: 1.6rem 1.4rem 1.8rem;
+      padding: 1.4rem 1.4rem 1.8rem;
       border: 1px solid rgba(255, 255, 255, 0.8);
-    }
-
-    /* ---------- HEADER ---------- */
-    .app-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: flex-start;
-      flex-wrap: wrap;
-      gap: 0.8rem;
-      margin-bottom: 1rem;
-    }
-
-    .app-header h1 {
-      font-size: 1.5rem;
-      font-weight: 800;
-      letter-spacing: -0.02em;
-      color: var(--primary-dark);
-      display: flex;
-      align-items: center;
-      gap: 0.6rem;
-      flex-wrap: wrap;
-    }
-
-    .app-header h1 i {
-      color: var(--primary);
-    }
-
-    .badge {
-      background: var(--primary);
-      color: white;
-      font-size: 0.72rem;
-      font-weight: 700;
-      padding: 0.3rem 0.9rem;
-      border-radius: 40px;
-      letter-spacing: 0.3px;
-      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-      display: inline-flex;
-      align-items: center;
-      gap: 0.3rem;
-    }
-
-    .header-stats {
-      display: flex;
-      gap: 0.7rem;
-      flex-wrap: wrap;
-      align-items: center;
-    }
-
-    .timer-box {
-      background: #1e3b4b;
-      color: #d4edff;
-      font-weight: 700;
-      font-size: 1rem;
-      padding: 0.4rem 1rem;
-      border-radius: 60px;
-      font-variant-numeric: tabular-nums;
-      box-shadow: 0 6px 14px rgba(0, 30, 40, 0.25);
-      letter-spacing: 1px;
-      border: 1px solid #5d8aa0;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-
-    .timer-box i {
-      color: #f1c40f;
-    }
-
-    .timer-box span {
-      background: #2f6580;
-      border-radius: 30px;
-      padding: 0.15rem 0.8rem;
-      color: white;
-      font-size: 1rem;
     }
 
     /* ---------- TAB NAVIGATION ---------- */
@@ -1022,13 +1105,39 @@
     }
 
     /* ---------- RESPONSIVE ---------- */
+    @media (max-width: 720px) {
+      :root { --header-h: 110px; }
+      .sticky-inner {
+        padding: 0.4rem 0.7rem;
+        gap: 0.5rem;
+      }
+      .brand {
+        font-size: 0.95rem;
+      }
+      .brand .brand-badge {
+        display: none;
+      }
+      .header-progress {
+        gap: 0.4rem;
+        margin-left: 0;
+        width: 100%;
+        justify-content: flex-start;
+      }
+      .hpill {
+        font-size: 0.66rem;
+        padding: 0.25rem 0.55rem;
+      }
+      .header-timer {
+        font-size: 0.78rem;
+        padding: 0.25rem 0.7rem;
+        margin-left: auto;
+      }
+    }
+
     @media (max-width: 600px) {
       .quiz-container {
         padding: 1rem 0.8rem 1.4rem;
         border-radius: 1.4rem;
-      }
-      .app-header h1 {
-        font-size: 1.2rem;
       }
       .tab-btn {
         min-width: 85px;
@@ -1053,13 +1162,6 @@
       .btn {
         padding: 0.65rem 1.4rem;
         font-size: 0.9rem;
-      }
-      .timer-box {
-        font-size: 0.85rem;
-        padding: 0.3rem 0.8rem;
-      }
-      .timer-box span {
-        font-size: 0.85rem;
       }
       .score-big {
         font-size: 1.3rem;
@@ -1100,22 +1202,37 @@
   </style>
 </head>
 <body>
-  <div class="quiz-container">
-    <!-- HEADER -->
-    <div class="app-header">
-      <h1>
+  <!-- ========== STICKY HEADER ========== -->
+  <header class="sticky-header" id="stickyHeader">
+    <div class="sticky-inner">
+      <div class="brand">
         <i class="fas fa-book-open"></i>
         AD-CSS 313
-        <span class="badge"><i class="fas fa-graduation-cap"></i>Quiz</span>
-      </h1>
-      <div class="header-stats">
-        <div class="timer-box">
-          <i class="fas fa-stopwatch"></i>
+        <span class="brand-badge"><i class="fas fa-graduation-cap"></i>Quiz</span>
+      </div>
+      <div class="header-progress" id="headerProgress">
+        <span class="hpill" id="hpillMC" title="Part I progress">
+          <i class="fas fa-list-ol"></i> I
+          <span class="hpill-count" id="hpillMCCount">0/71</span>
+        </span>
+        <span class="hpill" id="hpillCable" title="Part II progress">
+          <i class="fas fa-ethernet"></i> II
+          <span class="hpill-count" id="hpillCableCount">0/16</span>
+        </span>
+        <span class="hpill locked" id="hpillSit" title="Part III progress">
+          <i class="fas fa-lightbulb"></i> III
+          <span class="hpill-count" id="hpillSitCount">0/10</span>
+        </span>
+        <span class="header-timer" id="headerTimer">
+          <i class="fas fa-stopwatch" id="timerIcon"></i>
           <span id="timerDisplay">00:00</span>
-        </div>
+        </span>
       </div>
     </div>
+  </header>
 
+  <!-- ========== MAIN CONTAINER ========== -->
+  <div class="quiz-container">
     <!-- TAB NAVIGATION -->
     <div class="tab-nav">
       <button class="tab-btn active" data-tab="tab-mc">
@@ -1128,7 +1245,7 @@
       </button>
       <button class="tab-btn" data-tab="tab-sit" id="sitTabBtn">
         <i class="fas fa-lightbulb"></i> Part III
-        <span class="tab-progress" id="sitProgress">0/5</span>
+        <span class="tab-progress" id="sitProgress">0/10</span>
       </button>
       <button class="tab-btn" data-tab="tab-result">
         <i class="fas fa-chart-simple"></i> Results
@@ -1228,15 +1345,15 @@
     <!-- ========== TAB 3: SITUATIONAL ========== -->
     <div id="tab-sit" class="tab-panel">
       <div class="section-title">
-        <i class="fas fa-lightbulb"></i> Part III — Situational Questions
-        <span class="section-badge">5 items</span>
+        <i class="fas fa-lightbulb"></i> Part III — Situational & Analysis Questions
+        <span class="section-badge">10 items</span>
       </div>
       <div id="sitLockedNotice" class="notice-banner danger" style="display:none;">
         <i class="fas fa-lock"></i>
         <div>Part III is locked. Submit Part I and Part II first to unlock these questions.</div>
       </div>
       <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:0.5rem; margin-bottom:0.5rem;">
-        <div class="progress-indicator"><i class="fas fa-circle-check"></i> <span id="sitAnsweredCount">0 / 5 answered</span></div>
+        <div class="progress-indicator"><i class="fas fa-circle-check"></i> <span id="sitAnsweredCount">0 / 10 answered</span></div>
       </div>
       <div id="situationalContainer" class="questions-grid"></div>
       <div class="actions">
@@ -1254,7 +1371,7 @@
         <div class="score-big">
           <i class="fas fa-trophy"></i>
           <span>Overall Score:</span>
-          <span id="scoreDisplay">0 / 87</span>
+          <span id="scoreDisplay">0 / 97</span>
         </div>
         <div id="scoreBreakdown" style="margin-bottom:0.8rem; font-size:0.9rem; color:var(--text-muted); font-weight:600;"></div>
 
@@ -1284,14 +1401,15 @@
       // STORAGE KEYS
       // ============================================================
       const STORAGE_KEYS = {
-        mc: 'adcss313_mc_answers_v4',
-        sit: 'adcss313_sit_answers_v4',
-        cableStraightA: 'adcss313_cable_straight_A_v4',
-        cableStraightB: 'adcss313_cable_straight_B_v4',
-        cableCrossoverA: 'adcss313_cable_crossover_A_v4',
-        cableCrossoverB: 'adcss313_cable_crossover_B_v4',
-        submitted: 'adcss313_submitted_flags_v4',
-        settings: 'adcss313_cable_settings_v4'
+        mc: 'adcss313_mc_answers_v7',
+        sit: 'adcss313_sit_answers_v7',
+        cableStraightA: 'adcss313_cable_straight_A_v7',
+        cableStraightB: 'adcss313_cable_straight_B_v7',
+        cableCrossoverA: 'adcss313_cable_crossover_A_v7',
+        cableCrossoverB: 'adcss313_cable_crossover_B_v7',
+        submitted: 'adcss313_submitted_flags_v7',
+        settings: 'adcss313_cable_settings_v7',
+        timer: 'adcss313_timer_v7'
       };
 
       // ============================================================
@@ -1371,13 +1489,103 @@
         { text: "Which statement accurately reflects the PDF's cable-testing instruction?", options: ["Test the cable before arranging any wires", "Plug the finished cable into a tester to verify connections", "Use Rufus to test the cable", "A tester is not needed"] }
       ];
 
+      // ============================================================
+      // SITUATIONAL & ANALYSIS QUESTIONS (10 items)
+      // ============================================================
       const situationalQuestions = [
-        { text: "A technician is preparing a bootable USB for a modern UEFI laptop. Which partition scheme should they select in Rufus?", options: ["MBR", "GPT", "Legacy BIOS", "NTFS"] },
-        { text: "While crimping an RJ45 connector, the technician notices the gold pins are facing down. According to the T568A procedure, what should they do?", options: ["Continue crimping", "Flip the connector so gold pins face up", "Use a different crimping tool", "Remove the wires and start over"] },
-        { text: "A user wants to install Windows 10 in VirtualBox but has only 2 GB of RAM available. What does the module recommend?", options: ["Proceed with 2 GB", "Allocate at least 4 GB (4096 MB) for smooth performance", "Use 1 GB instead", "Skip the RAM allocation"] },
-        { text: "After creating a bootable USB with Rufus, the status bar turns completely green and shows 'Ready'. What is the next recommended step?", options: ["Immediately remove the USB without ejecting", "Close Rufus and safely eject the flash drive", "Restart the computer", "Re-run Rufus"] },
-        { text: "A technician is installing Windows 10 in VirtualBox and reaches the product key prompt without a key. What should they select?", options: ["Enter a random key", "I don't have a product key", "Skip the installation", "Create a virtual hard disk"] }
+        {
+          text: "A technician is preparing a bootable USB for a modern UEFI laptop. They select MBR in Rufus. What is the most likely result?",
+          options: [
+            "The USB will boot correctly on the UEFI laptop",
+            "The USB may not boot because UEFI systems require GPT",
+            "Rufus will automatically convert MBR to GPT",
+            "The ISO file will be corrupted"
+          ]
+        },
+        {
+          text: "While crimping an RJ45 connector, a technician notices the gold pins are facing down. According to the T568A procedure, what should they do?",
+          options: [
+            "Continue crimping — orientation does not matter",
+            "Flip the connector so the gold pins face up before inserting the wires",
+            "Use a different crimping tool",
+            "Remove the wires and start over with a new connector"
+          ]
+        },
+        {
+          text: "A user wants to install Windows 10 in VirtualBox but their host machine has only 2 GB of RAM available. What is the most appropriate action based on the module?",
+          options: [
+            "Proceed with 2 GB — Windows will manage",
+            "Allocate at least 4 GB (4096 MB) as recommended for smooth performance, or free up RAM first",
+            "Use 1 GB instead to save resources",
+            "Skip the RAM allocation entirely"
+          ]
+        },
+        {
+          text: "After creating a bootable USB with Rufus, the status bar turns completely green and shows 'Ready'. What is the next recommended step?",
+          options: [
+            "Immediately remove the USB without ejecting",
+            "Close Rufus and safely eject the flash drive",
+            "Restart the computer while the USB is still inserted",
+            "Re-run Rufus to verify the write"
+          ]
+        },
+        {
+          text: "A technician is installing Windows 10 in VirtualBox and reaches the product key prompt without a key. What should they select?",
+          options: [
+            "Enter a random key to bypass",
+            "I don't have a product key",
+            "Skip the installation entirely",
+            "Create a virtual hard disk instead"
+          ]
+        },
+        {
+          text: "A network administrator needs to connect two switches of the same type directly using a copper cable. Which cable type and wiring should they use?",
+          options: [
+            "Straight-through cable with T568A on both ends",
+            "Straight-through cable with T568B on both ends",
+            "Crossover cable — T568A on one end and T568B on the other",
+            "Any cable type works because modern switches auto-sense"
+          ]
+        },
+        {
+          text: "During cable testing, a technician finds that pins 1 and 2 light up correctly but pins 3 and 6 do not. Which wire pair is most likely miswired?",
+          options: [
+            "The blue pair (pins 4 and 5)",
+            "The brown pair (pins 7 and 8)",
+            "The orange/green pair related to pins 3 and 6",
+            "The white/blue pair (pin 5)"
+          ]
+        },
+        {
+          text: "A technician is installing Windows 10 in VirtualBox and must create three drive partitions. According to the module, what should the sizes be?",
+          options: [
+            "C: 10 GB, D: 10 GB, E: 80 GB",
+            "C: 80 GB, D: 10 GB, E: 10 GB",
+            "C: 40 GB, D: 40 GB, E: 40 GB",
+            "C: 100 GB, D: 50 GB, E: 50 GB"
+          ]
+        },
+        {
+          text: "An analyst is reviewing a straight-through cable where End A follows T568A and End B follows T568B. What type of cable is this actually?",
+          options: [
+            "A standard straight-through cable",
+            "A crossover cable",
+            "A rollover cable",
+            "A faulty straight-through cable"
+          ]
+        },
+        {
+          text: "A technician successfully creates a bootable USB, installs Windows in VirtualBox, and crimps a working cable. Which activity in the module covers the crimping procedure?",
+          options: [
+            "Activity 2 — Create a bootable device",
+            "Activity 3 — Windows installation using VirtualBox",
+            "Activity 4 — Crossover and straight-through cable (T568A)",
+            "Activity 1 — Introduction to networking"
+          ]
+        }
       ];
+
+      const situationalKey = [1, 1, 1, 1, 1, 2, 2, 1, 1, 2];
 
       const answerKey = [
         'B','C','A','B','C','D','A','C','B','C','A','B','C','C','B','A','C','A','A','A',
@@ -1385,8 +1593,6 @@
         'A','B','B','A','B','A','B','A','B','B',
         'C','B','C','C','C','A','B','A','B','C','A','A','B','C','B','A','A','A','C','A','B'
       ];
-
-      const situationalKey = ['B','B','B','B','B'];
 
       // ============================================================
       // CABLE DATA
@@ -1433,11 +1639,11 @@
       // STATE
       // ============================================================
       let userAnswers = new Array(71).fill(null);
-      let userSituational = new Array(5).fill(null);
+      let userSituational = new Array(10).fill(null);
       let timerInterval = null;
       let secondsElapsed = 0;
+      let timerFinished = false;
 
-      // 4 wiring combinations: each with its own endA/endB
       let straightA = { endA: new Array(8).fill(null), endB: new Array(8).fill(null) };
       let straightB = { endA: new Array(8).fill(null), endB: new Array(8).fill(null) };
       let crossoverA = { endA: new Array(8).fill(null), endB: new Array(8).fill(null) };
@@ -1455,19 +1661,19 @@
       let submittedCable = false;
       let submittedSit = false;
 
-      // Per-standard correctness for current cable type
       let straightACorrect = 0;
       let straightBCorrect = 0;
       let crossoverACorrect = 0;
       let crossoverBCorrect = 0;
 
-      // Final cable score (sum of both standards, max 16)
       let cableScore = 0;
 
       // DOM refs
       const container = document.getElementById('questionsContainer');
       const situationalContainer = document.getElementById('situationalContainer');
       const timerDisplay = document.getElementById('timerDisplay');
+      const headerTimer = document.getElementById('headerTimer');
+      const timerIcon = document.getElementById('timerIcon');
       const resultSection = document.getElementById('resultSection');
       const scoreDisplay = document.getElementById('scoreDisplay');
       const scoreBreakdown = document.getElementById('scoreBreakdown');
@@ -1485,6 +1691,22 @@
       const cableNotice = document.getElementById('cableNotice');
       const cablePills = document.getElementById('cablePills');
 
+      const stickyHeader = document.getElementById('stickyHeader');
+      const hpillMC = document.getElementById('hpillMC');
+      const hpillMCCount = document.getElementById('hpillMCCount');
+      const hpillCable = document.getElementById('hpillCable');
+      const hpillCableCount = document.getElementById('hpillCableCount');
+      const hpillSit = document.getElementById('hpillSit');
+      const hpillSitCount = document.getElementById('hpillSitCount');
+
+      // ============================================================
+      // STICKY HEADER SCROLL
+      // ============================================================
+      window.addEventListener('scroll', () => {
+        if (window.scrollY > 10) stickyHeader.classList.add('scrolled');
+        else stickyHeader.classList.remove('scrolled');
+      }, { passive: true });
+
       // ============================================================
       // PERSISTENCE
       // ============================================================
@@ -1497,19 +1719,10 @@
       function saveCable(which) {
         try {
           let key, data;
-          if (which === 'straightA') {
-            key = STORAGE_KEYS.cableStraightA;
-            data = straightA;
-          } else if (which === 'straightB') {
-            key = STORAGE_KEYS.cableStraightB;
-            data = straightB;
-          } else if (which === 'crossoverA') {
-            key = STORAGE_KEYS.cableCrossoverA;
-            data = crossoverA;
-          } else {
-            key = STORAGE_KEYS.cableCrossoverB;
-            data = crossoverB;
-          }
+          if (which === 'straightA') { key = STORAGE_KEYS.cableStraightA; data = straightA; }
+          else if (which === 'straightB') { key = STORAGE_KEYS.cableStraightB; data = straightB; }
+          else if (which === 'crossoverA') { key = STORAGE_KEYS.cableCrossoverA; data = crossoverA; }
+          else { key = STORAGE_KEYS.cableCrossoverB; data = crossoverB; }
           localStorage.setItem(key, JSON.stringify({ endA: data.endA, endB: data.endB }));
         } catch (e) {}
       }
@@ -1528,6 +1741,13 @@
           }));
         } catch (e) {}
       }
+      function saveTimerState() {
+        try {
+          localStorage.setItem(STORAGE_KEYS.timer, JSON.stringify({
+            secondsElapsed, timerFinished
+          }));
+        } catch (e) {}
+      }
 
       function loadAll() {
         try {
@@ -1541,7 +1761,7 @@
           const sit = localStorage.getItem(STORAGE_KEYS.sit);
           if (sit) {
             const p = JSON.parse(sit);
-            if (Array.isArray(p) && p.length === 5) userSituational = p;
+            if (Array.isArray(p) && p.length === 10) userSituational = p;
           }
         } catch (e) {}
 
@@ -1587,6 +1807,14 @@
             if (typeof p.cableScore === 'number') cableScore = p.cableScore;
           }
         } catch (e) {}
+        try {
+          const t = localStorage.getItem(STORAGE_KEYS.timer);
+          if (t) {
+            const p = JSON.parse(t);
+            if (typeof p.secondsElapsed === 'number') secondsElapsed = p.secondsElapsed;
+            if (typeof p.timerFinished === 'boolean') timerFinished = p.timerFinished;
+          }
+        } catch (e) {}
       }
 
       function clearAllStorage() {
@@ -1630,6 +1858,8 @@
         if (btn) btn.classList.add('active');
         if (panel) panel.classList.add('active');
         if (tabId === 'tab-result') updateResultTab();
+        const containerTop = document.querySelector('.quiz-container').offsetTop - 90;
+        window.scrollTo({ top: Math.max(0, containerTop), behavior: 'smooth' });
       }
 
       document.querySelectorAll('.tab-btn').forEach(btn => {
@@ -1712,7 +1942,6 @@
         return std === 'T568A' ? t568aColors : t568bColors;
       }
 
-      // For a given combination (type + standard), expected End A and End B
       function getExpectedFor(type, std) {
         const endAExpected = getStandardColors(std).map(w => w.color);
         let endBExpected;
@@ -2045,10 +2274,8 @@
           msg.style.color = '#e74c3c';
         }
 
-        // Update pills
         renderPills();
 
-        // Notify if this standard is done but the other isn't
         if (isCurrentStandardComplete() && !isBothStandardsCompleteForType()) {
           const other = simStandard === 'T568A' ? 'T568B' : 'T568A';
           cableNotice.className = 'notice-banner';
@@ -2135,9 +2362,9 @@
         const mcAnswered = userAnswers.filter(a => a !== null).length;
         const sitAnswered = userSituational.filter(a => a !== null).length;
         mcAnsweredCount.textContent = `${mcAnswered} / 71 answered`;
-        sitAnsweredCount.textContent = `${sitAnswered} / 5 answered`;
+        sitAnsweredCount.textContent = `${sitAnswered} / 10 answered`;
         mcProgress.textContent = `${mcAnswered}/71`;
-        sitProgress.textContent = `${sitAnswered}/5`;
+        sitProgress.textContent = `${sitAnswered}/10`;
         if (submittedCable) {
           cableProgress.textContent = `✓ ${cableScore}/16`;
         } else {
@@ -2146,6 +2373,27 @@
         if (submittedMC && submittedCable && submittedSit) {
           resultProgress.textContent = '✓';
         }
+
+        hpillMCCount.textContent = `${mcAnswered}/71`;
+        if (submittedMC) hpillMC.classList.add('done');
+        else hpillMC.classList.remove('done');
+
+        if (submittedCable) {
+          hpillCableCount.textContent = `✓ ${cableScore}/16`;
+          hpillCable.classList.add('done');
+        } else {
+          computeAllCorrectness();
+          const typeA = simType === 'straight' ? straightACorrect : crossoverACorrect;
+          const typeB = simType === 'straight' ? straightBCorrect : crossoverBCorrect;
+          hpillCableCount.textContent = `${typeA + typeB}/16`;
+          hpillCable.classList.remove('done');
+        }
+
+        if (submittedMC) hpillSit.classList.remove('locked');
+        else hpillSit.classList.add('locked');
+        hpillSitCount.textContent = `${sitAnswered}/10`;
+        if (submittedSit) hpillSit.classList.add('done');
+        else hpillSit.classList.remove('done');
       }
 
       // ============================================================
@@ -2170,17 +2418,39 @@
       });
 
       // ============================================================
-      // TIMER
+      // TIMER (fixed stop after final submission)
       // ============================================================
+      function formatTime(secs) {
+        const mins = Math.floor(secs / 60).toString().padStart(2, '0');
+        const s = (secs % 60).toString().padStart(2, '0');
+        return `${mins}:${s}`;
+      }
+
+      function setTimerStoppedUI() {
+        headerTimer.classList.add('stopped');
+        timerIcon.className = 'fas fa-circle-pause';
+      }
+
+      function setTimerRunningUI() {
+        headerTimer.classList.remove('stopped');
+        timerIcon.className = 'fas fa-stopwatch';
+      }
+
       function startTimer() {
         if (timerInterval) clearInterval(timerInterval);
-        secondsElapsed = 0;
-        timerDisplay.textContent = '00:00';
+        if (timerFinished) {
+          // Restore frozen time display
+          timerDisplay.textContent = formatTime(secondsElapsed);
+          setTimerStoppedUI();
+          return;
+        }
+        setTimerRunningUI();
+        timerDisplay.textContent = formatTime(secondsElapsed);
         timerInterval = setInterval(() => {
+          if (timerFinished) return;
           secondsElapsed++;
-          const mins = Math.floor(secondsElapsed / 60).toString().padStart(2, '0');
-          const secs = (secondsElapsed % 60).toString().padStart(2, '0');
-          timerDisplay.textContent = `${mins}:${secs}`;
+          timerDisplay.textContent = formatTime(secondsElapsed);
+          if (secondsElapsed % 5 === 0) saveTimerState();
         }, 1000);
       }
 
@@ -2189,6 +2459,15 @@
           clearInterval(timerInterval);
           timerInterval = null;
         }
+      }
+
+      // Call this when the entire quiz is complete
+      function finalizeTimer() {
+        timerFinished = true;
+        stopTimer();
+        saveTimerState();
+        timerDisplay.textContent = formatTime(secondsElapsed);
+        setTimerStoppedUI();
       }
 
       // ============================================================
@@ -2219,7 +2498,6 @@
       function submitCable() {
         computeAllCorrectness();
 
-        // Determine which combo is currently active
         if (simType === 'straight') {
           if (straightACorrect < 8 || straightBCorrect < 8) {
             cableNotice.className = 'notice-banner danger';
@@ -2227,7 +2505,7 @@
               `Current: T568A ${straightACorrect}/8, T568B ${straightBCorrect}/8.</div>`;
             return;
           }
-          cableScore = straightACorrect + straightBCorrect; // 16
+          cableScore = straightACorrect + straightBCorrect;
         } else {
           if (crossoverACorrect < 8 || crossoverBCorrect < 8) {
             cableNotice.className = 'notice-banner danger';
@@ -2235,7 +2513,7 @@
               `Current: T568A ${crossoverACorrect}/8, T568B ${crossoverBCorrect}/8.</div>`;
             return;
           }
-          cableScore = crossoverACorrect + crossoverBCorrect; // 16
+          cableScore = crossoverACorrect + crossoverBCorrect;
         }
 
         submittedCable = true;
@@ -2251,7 +2529,7 @@
       }
 
       // ============================================================
-      // SUBMIT PART III
+      // SUBMIT PART III (final submission → stop timer)
       // ============================================================
       function submitSit() {
         if (!submittedMC) { alert('Please submit Part I first.'); return; }
@@ -2261,6 +2539,10 @@
         updateCounters();
         situationalContainer.querySelectorAll('input[type="radio"]').forEach(r => r.disabled = true);
         document.getElementById('submitSitBtn').disabled = true;
+
+        // Final submission → freeze timer permanently
+        finalizeTimer();
+
         updateResultTab();
         switchTab('tab-result');
       }
@@ -2287,20 +2569,18 @@
           if (userAnswers[i] === correctIdx) mcCorrect++;
         }
         let sitCorrect = 0;
-        for (let i = 0; i < 5; i++) {
+        for (let i = 0; i < 10; i++) {
           if (userSituational[i] === null) continue;
-          const correctLetter = situationalKey[i];
-          const correctIdx = correctLetter.charCodeAt(0) - 65;
-          if (userSituational[i] === correctIdx) sitCorrect++;
+          if (userSituational[i] === situationalKey[i]) sitCorrect++;
         }
 
         const totalScore = mcCorrect + cableScore + sitCorrect;
-        const totalMax = 71 + 16 + 5;
+        const totalMax = 71 + 16 + 10;
         scoreDisplay.textContent = `${totalScore} / ${totalMax}`;
         scoreBreakdown.innerHTML = `
           <span style="margin-right:1.2rem;"><i class="fas fa-list-ol"></i> Part I: <strong>${mcCorrect}/71</strong></span>
           <span style="margin-right:1.2rem;"><i class="fas fa-ethernet"></i> Part II: <strong>${cableScore}/16</strong></span>
-          <span><i class="fas fa-lightbulb"></i> Part III: <strong>${sitCorrect}/5</strong></span>
+          <span><i class="fas fa-lightbulb"></i> Part III: <strong>${sitCorrect}/10</strong></span>
         `;
 
         let keyHtml = '';
@@ -2330,10 +2610,10 @@
             `;
           }
         }
-        for (let i = 0; i < 5; i++) {
+        for (let i = 0; i < 10; i++) {
           const userAns = userSituational[i];
-          const correctLetter = situationalKey[i];
-          const correctIdx = correctLetter.charCodeAt(0) - 65;
+          const correctIdx = situationalKey[i];
+          const correctLetter = String.fromCharCode(65 + correctIdx);
           if (userAns === null || userAns !== correctIdx) {
             const q = situationalQuestions[i];
             const userLetter = userAns !== null ? String.fromCharCode(65 + userAns) : '—';
@@ -2352,7 +2632,6 @@
         }
 
         if (submittedCable) {
-          // Show errors for the submitted cable type's both standards
           const typeToShow = simType;
           const combos = typeToShow === 'straight'
             ? [['T568A', straightA], ['T568B', straightB]]
@@ -2405,7 +2684,7 @@
       }
 
       // ============================================================
-      // RESET
+      // RESET (restarts timer)
       // ============================================================
       function resetQuiz() {
         if (!confirm('Reset the entire quiz? All answers and cable progress will be cleared.')) return;
@@ -2413,7 +2692,7 @@
         clearAllStorage();
 
         userAnswers = new Array(71).fill(null);
-        userSituational = new Array(5).fill(null);
+        userSituational = new Array(10).fill(null);
         straightA = { endA: new Array(8).fill(null), endB: new Array(8).fill(null) };
         straightB = { endA: new Array(8).fill(null), endB: new Array(8).fill(null) };
         crossoverA = { endA: new Array(8).fill(null), endB: new Array(8).fill(null) };
@@ -2431,6 +2710,8 @@
         submittedMC = false;
         submittedCable = false;
         submittedSit = false;
+        secondsElapsed = 0;
+        timerFinished = false;
 
         document.getElementById('simStandard').value = 'T568A';
         document.getElementById('simType').value = 'straight';
@@ -2459,7 +2740,7 @@
         noResultMsg.innerHTML = '<i class="fas fa-clipboard-check" style="font-size:2rem; margin-bottom:0.8rem; opacity:0.5;"></i><p style="font-weight:600;">Submit all three parts to see your overall results.</p>';
         answerKeyGrid.innerHTML = '';
         reviewContainer.innerHTML = '';
-        scoreDisplay.textContent = '0 / 87';
+        scoreDisplay.textContent = '0 / 97';
         scoreBreakdown.innerHTML = '';
         resultProgress.textContent = '—';
 
@@ -2501,10 +2782,15 @@
         if (submittedSit) {
           situationalContainer.querySelectorAll('input[type="radio"]').forEach(r => r.disabled = true);
           document.getElementById('submitSitBtn').disabled = true;
+          // If all three parts are done, ensure timer is frozen
+          if (submittedMC && submittedCable) {
+            timerFinished = true;
+            saveTimerState();
+          }
         }
 
         updateCounters();
-        startTimer();
+        startTimer(); // respects timerFinished
 
         document.getElementById('submitMCBtn').addEventListener('click', submitMC);
         document.getElementById('submitCableBtn').addEventListener('click', submitCable);
@@ -2520,6 +2806,8 @@
         if (submittedMC && submittedCable && submittedSit) {
           updateResultTab();
         }
+
+        if (window.scrollY > 10) stickyHeader.classList.add('scrolled');
       }
 
       init();
