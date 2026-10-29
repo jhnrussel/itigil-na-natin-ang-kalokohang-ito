@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
-  <title>AD-CSS 313 · Quiz + Cable Simulator</title>
+  <title>AD-CSS 313 · Ultimate Module Quiz + Cable Simulator</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
   <style>
     * {
@@ -611,6 +611,13 @@
       transform: scale(0.95);
     }
 
+    .wire-token.selected {
+      border-color: var(--accent);
+      background: #fff8e6;
+      box-shadow: 0 0 0 3px rgba(232,162,43,0.3);
+      cursor: pointer;
+    }
+
     .wire-token.used {
       opacity: 0.35;
       pointer-events: none;
@@ -711,6 +718,12 @@
       border-color: var(--primary);
       background: #e8f4fa;
       transform: scale(1.05);
+    }
+
+    .pin-dropzone.click-target {
+      border-color: var(--accent);
+      background: #fff8e6;
+      box-shadow: 0 0 0 2px rgba(232,162,43,0.3);
     }
 
     .pin-dropzone.filled {
@@ -978,7 +991,7 @@
       <h1>
         <i class="fas fa-book-open"></i>
         AD-CSS 313
-        <span class="badge"><i class="fas fa-graduation-cap"></i>  Quiz</span>
+        <span class="badge"><i class="fas fa-graduation-cap"></i> Ultimate Quiz</span>
       </h1>
       <div class="header-stats">
         <div class="timer-box">
@@ -1045,7 +1058,7 @@
 
         <!-- Wire Palette -->
         <div class="wire-palette" id="wirePalette">
-          <div class="palette-label"><i class="fas fa-palette"></i> Wire Palette — drag wires into the RJ45 slots below</div>
+          <div class="palette-label"><i class="fas fa-palette"></i> Wire Palette — drag a wire OR click a wire then click a pin slot</div>
         </div>
 
         <!-- Two connectors side by side -->
@@ -1282,6 +1295,9 @@
       let endA = new Array(8).fill(null);
       let endB = new Array(8).fill(null);
 
+      // Click-and-drop selection state
+      let selectedWire = null; // wire name currently selected via click
+
       // DOM refs
       const container = document.getElementById('questionsContainer');
       const situationalContainer = document.getElementById('situationalContainer');
@@ -1309,7 +1325,6 @@
           btn.classList.add('active');
           const target = document.getElementById(btn.dataset.tab);
           if (target) target.classList.add('active');
-          // Auto-show results when opening results tab
           if (btn.dataset.tab === 'tab-result' && isSubmitted) {
             resultSection.style.display = 'block';
             noResultMsg.style.display = 'none';
@@ -1381,7 +1396,7 @@
       }
 
       // ============================================================
-      // CABLE SIMULATOR
+      // CABLE SIMULATOR (with click-and-drop + drag-and-drop)
       // ============================================================
       function getStandardColors(std) {
         return std === 'T568A' ? t568aColors : t568bColors;
@@ -1400,6 +1415,7 @@
         }
       }
 
+      // Render wire palette
       function renderPalette() {
         const palette = document.getElementById('wirePalette');
         const usedA = endA.filter(w => w !== null);
@@ -1408,13 +1424,17 @@
         usedA.forEach(w => usedCount[w] = (usedCount[w] || 0) + 1);
         usedB.forEach(w => usedCount[w] = (usedCount[w] || 0) + 1);
 
-        let html = '<div class="palette-label"><i class="fas fa-palette"></i> Wire Palette — drag wires into the RJ45 slots below</div>';
+        let html = '<div class="palette-label"><i class="fas fa-palette"></i> Wire Palette — drag a wire OR click a wire then click a pin slot</div>';
         allWireNames.forEach(wireName => {
           const used = usedCount[wireName] || 0;
           const available = used < 2;
           const swatchCss = wireColorMap[wireName];
+          const isSelected = selectedWire === wireName;
           html += `
-            <div class="wire-token ${!available ? 'used' : ''}" draggable="${available}" data-wire="${wireName}">
+            <div class="wire-token ${!available ? 'used' : ''} ${isSelected ? 'selected' : ''}"
+                 draggable="${available}"
+                 data-wire="${wireName}"
+                 title="${available ? 'Drag or click to select' : 'All 2 copies used'}">
               <span class="swatch" style="background:${swatchCss}"></span>
               <span>${wireName}</span>
               <span style="font-size:0.62rem; color:#7f8c8d;">(${used}/2)</span>
@@ -1423,9 +1443,37 @@
         });
         palette.innerHTML = html;
 
+        // Attach drag listeners
         palette.querySelectorAll('.wire-token[draggable="true"]').forEach(token => {
           token.addEventListener('dragstart', handleDragStart);
           token.addEventListener('dragend', handleDragEnd);
+        });
+
+        // Attach click listeners for click-and-drop
+        palette.querySelectorAll('.wire-token:not(.used)').forEach(token => {
+          token.addEventListener('click', (e) => {
+            const wire = token.dataset.wire;
+            if (selectedWire === wire) {
+              // Deselect
+              selectedWire = null;
+            } else {
+              selectedWire = wire;
+            }
+            renderPalette();
+            // Highlight clickable pin slots
+            updateClickTargets();
+          });
+        });
+      }
+
+      // Highlight pin slots when a wire is selected
+      function updateClickTargets() {
+        document.querySelectorAll('.pin-dropzone').forEach(dz => {
+          if (selectedWire) {
+            dz.classList.add('click-target');
+          } else {
+            dz.classList.remove('click-target');
+          }
         });
       }
 
@@ -1444,6 +1492,7 @@
         document.querySelectorAll('.pin-dropzone').forEach(dz => dz.classList.remove('drag-over'));
       }
 
+      // Render connectors
       function renderConnectors() {
         const endABody = document.getElementById('endABody');
         const endBBody = document.getElementById('endBBody');
@@ -1454,7 +1503,7 @@
           const filled = wire !== null;
           let inner = filled
             ? `<div class="placed-wire"><span class="swatch" style="background:${wireColorMap[wire]}"></span><span>${wire}</span></div>`
-            : `<span class="placeholder-text">Drop<br>wire</span>`;
+            : `<span class="placeholder-text">Drop / click</span>`;
           htmlA += `
             <div class="pin-slot">
               <div class="pin-label">Pin ${i+1}</div>
@@ -1470,7 +1519,7 @@
           const filled = wire !== null;
           let inner = filled
             ? `<div class="placed-wire"><span class="swatch" style="background:${wireColorMap[wire]}"></span><span>${wire}</span></div>`
-            : `<span class="placeholder-text">Drop<br>wire</span>`;
+            : `<span class="placeholder-text">Drop / click</span>`;
           htmlB += `
             <div class="pin-slot">
               <div class="pin-label">Pin ${i+1}</div>
@@ -1485,6 +1534,7 @@
           ? simStandard
           : (simStandard === 'T568A' ? 'T568B' : 'T568A');
 
+        // Attach drop + click listeners to pin zones
         document.querySelectorAll('.pin-dropzone').forEach(dz => {
           dz.addEventListener('dragover', (e) => {
             e.preventDefault();
@@ -1493,9 +1543,21 @@
           });
           dz.addEventListener('dragleave', () => dz.classList.remove('drag-over'));
           dz.addEventListener('drop', handleDrop);
+
           dz.addEventListener('click', () => {
             const end = dz.dataset.end;
             const pin = parseInt(dz.dataset.pin, 10);
+
+            // If a wire is selected via click, place it
+            if (selectedWire) {
+              placeWire(end, pin, selectedWire);
+              selectedWire = null;
+              renderPalette();
+              updateClickTargets();
+              return;
+            }
+
+            // Otherwise, clicking a filled slot removes its wire
             if (end === 'A' && endA[pin] !== null) {
               endA[pin] = null;
               renderConnectors();
@@ -1511,6 +1573,25 @@
             }
           });
         });
+
+        updateClickTargets();
+      }
+
+      function placeWire(end, pin, wire) {
+        // Check availability (max 2 uses total)
+        const usedA = endA.filter(w => w !== null);
+        const usedB = endB.filter(w => w !== null);
+        const totalUsed = [...usedA, ...usedB].filter(w => w === wire).length;
+        if (totalUsed >= 2) return false;
+
+        if (end === 'A') endA[pin] = wire;
+        else endB[pin] = wire;
+
+        resetLeds();
+        document.getElementById('simMessage').textContent = '';
+        renderConnectors();
+        renderPalette();
+        return true;
       }
 
       function handleDrop(e) {
@@ -1521,19 +1602,7 @@
         const pin = parseInt(dz.dataset.pin, 10);
         const wire = e.dataTransfer.getData('text/plain');
         if (!wire) return;
-
-        const usedA = endA.filter(w => w !== null);
-        const usedB = endB.filter(w => w !== null);
-        const totalUsed = [...usedA, ...usedB].filter(w => w === wire).length;
-        if (totalUsed >= 2) return;
-
-        if (end === 'A') endA[pin] = wire;
-        else endB[pin] = wire;
-
-        resetLeds();
-        document.getElementById('simMessage').textContent = '';
-        renderConnectors();
-        renderPalette();
+        placeWire(end, pin, wire);
       }
 
       function resetLeds() {
@@ -1562,13 +1631,13 @@
         ledsContainer.innerHTML = html;
       }
 
+      // Test cable: runs on every pin even if some are wrong/missing
       function testCable() {
         const expectedA = getExpectedEndA();
         const expectedB = getExpectedEndB();
         const msg = document.getElementById('simMessage');
         let anyFilled = false;
         let allCorrect = true;
-        let errors = [];
 
         for (let i = 0; i < 8; i++) {
           const led = document.querySelector(`.led-circle[data-led="${i}"]`);
@@ -1580,10 +1649,12 @@
           const wireA = endA[i];
           const wireB = endB[i];
 
+          // If either end missing, show missing info
           if (wireA === null || wireB === null) {
-            // No wire — LED stays off, show what's missing
             if (wireA !== null || wireB !== null) {
-              detail.textContent = wireA === null ? `A: missing` : `B: missing`;
+              detail.textContent = wireA === null ? `A: empty` : `B: empty`;
+            } else {
+              detail.textContent = 'empty';
             }
             allCorrect = false;
             continue;
@@ -1602,24 +1673,22 @@
             led.classList.add('lit', 'error');
             icon.className = 'led-icon fas fa-xmark';
             allCorrect = false;
-            // Build error detail
             let errParts = [];
-            if (!continuity) errParts.push(`A≠B`);
-            if (!standardA) errParts.push(`A wrong`);
-            if (!standardB) errParts.push(`B wrong`);
+            if (!continuity) errParts.push('A≠B');
+            if (!standardA) errParts.push('A wrong');
+            if (!standardB) errParts.push('B wrong');
             detail.textContent = errParts.join(', ');
-            errors.push({ pin: i+1, wireA, wireB, expectedA: expectedA[i], expectedB: expectedB[i] });
           }
         }
 
-        if (!anyFilled) {
-          msg.innerHTML = '<i class="fas fa-triangle-exclamation"></i> No wires placed yet. Drag wires into the connectors.';
+        if (!anyFilled && !endA.some(w => w !== null) && !endB.some(w => w !== null)) {
+          msg.innerHTML = '<i class="fas fa-triangle-exclamation"></i> No wires placed yet. Drag or click wires into the connectors.';
           msg.style.color = '#f39c12';
-        } else if (allCorrect) {
+        } else if (allCorrect && endA.every(w => w !== null) && endB.every(w => w !== null)) {
           msg.innerHTML = '<i class="fas fa-circle-check"></i> Perfect! All 8 pins are correctly wired for ' + simStandard + ' ' + simType + ' cable.';
           msg.style.color = '#2ecc71';
         } else {
-          msg.innerHTML = '<i class="fas fa-circle-xmark"></i> Some pins are incorrect. See red LEDs above for details.';
+          msg.innerHTML = '<i class="fas fa-circle-xmark"></i> Some pins are incorrect or empty. Red LEDs show which pins have issues.';
           msg.style.color = '#e74c3c';
         }
       }
@@ -1627,6 +1696,7 @@
       function clearSimulator() {
         endA = new Array(8).fill(null);
         endB = new Array(8).fill(null);
+        selectedWire = null;
         resetLeds();
         document.getElementById('simMessage').textContent = '';
         renderPalette();
@@ -1652,6 +1722,15 @@
 
         document.getElementById('clearSimBtn').addEventListener('click', clearSimulator);
         document.getElementById('testBtn').addEventListener('click', testCable);
+
+        // Clicking outside palette/pins deselects wire
+        document.addEventListener('click', (e) => {
+          if (selectedWire && !e.target.closest('.wire-token') && !e.target.closest('.pin-dropzone')) {
+            selectedWire = null;
+            renderPalette();
+            updateClickTargets();
+          }
+        });
       }
 
       // ============================================================
@@ -1800,7 +1879,6 @@
 
         document.querySelectorAll('input[type="radio"]').forEach(radio => radio.disabled = true);
 
-        // Switch to results tab
         document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
         document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
         document.querySelector('.tab-btn[data-tab="tab-result"]').classList.add('active');
@@ -1830,7 +1908,6 @@
         updateCounters();
         startTimer();
 
-        // Switch back to first tab
         document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
         document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
         document.querySelector('.tab-btn[data-tab="tab-mc"]').classList.add('active');
