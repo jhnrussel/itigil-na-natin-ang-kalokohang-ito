@@ -1,0 +1,1858 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
+  <title>AD-CSS 313 · Quiz + Cable Simulator</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+    }
+
+    :root {
+      --primary: #1e4a6b;
+      --primary-dark: #0c2a3a;
+      --primary-light: #2f6580;
+      --accent: #e8a22b;
+      --success: #1b8c4a;
+      --danger: #c0392b;
+      --bg: #eef2f7;
+      --card: #ffffff;
+      --text: #102c3b;
+      --text-muted: #4f6d7e;
+      --border: #cbdae6;
+    }
+
+    body {
+      background: linear-gradient(145deg, #eef2f7 0%, #d9e2ef 100%);
+      min-height: 100vh;
+      padding: 1rem 0.8rem 2rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .quiz-container {
+      max-width: 1000px;
+      width: 100%;
+      background: rgba(255, 255, 255, 0.92);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      border-radius: 2rem;
+      box-shadow: 0 30px 60px -15px rgba(0, 20, 30, 0.3), inset 0 1px 3px rgba(255, 255, 255, 0.9);
+      padding: 1.6rem 1.4rem 1.8rem;
+      border: 1px solid rgba(255, 255, 255, 0.8);
+    }
+
+    /* ---------- HEADER ---------- */
+    .app-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      flex-wrap: wrap;
+      gap: 0.8rem;
+      margin-bottom: 1rem;
+    }
+
+    .app-header h1 {
+      font-size: 1.5rem;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      color: var(--primary-dark);
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      flex-wrap: wrap;
+    }
+
+    .app-header h1 i {
+      color: var(--primary);
+    }
+
+    .badge {
+      background: var(--primary);
+      color: white;
+      font-size: 0.72rem;
+      font-weight: 700;
+      padding: 0.3rem 0.9rem;
+      border-radius: 40px;
+      letter-spacing: 0.3px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      display: inline-flex;
+      align-items: center;
+      gap: 0.3rem;
+    }
+
+    .header-stats {
+      display: flex;
+      gap: 0.7rem;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    .timer-box {
+      background: #1e3b4b;
+      color: #d4edff;
+      font-weight: 700;
+      font-size: 1rem;
+      padding: 0.4rem 1rem;
+      border-radius: 60px;
+      font-variant-numeric: tabular-nums;
+      box-shadow: 0 6px 14px rgba(0, 30, 40, 0.25);
+      letter-spacing: 1px;
+      border: 1px solid #5d8aa0;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .timer-box i {
+      color: #f1c40f;
+    }
+
+    .timer-box span {
+      background: #2f6580;
+      border-radius: 30px;
+      padding: 0.15rem 0.8rem;
+      color: white;
+      font-size: 1rem;
+    }
+
+    /* ---------- TAB NAVIGATION ---------- */
+    .tab-nav {
+      display: flex;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+      background: #dfe8f0;
+      padding: 0.4rem;
+      border-radius: 1.2rem;
+      margin-bottom: 1.5rem;
+      box-shadow: inset 0 2px 6px rgba(0,0,0,0.06);
+    }
+
+    .tab-btn {
+      flex: 1;
+      min-width: 130px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      padding: 0.7rem 1rem;
+      border: none;
+      background: transparent;
+      border-radius: 1rem;
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: var(--text-muted);
+      cursor: pointer;
+      transition: all 0.2s;
+      position: relative;
+    }
+
+    .tab-btn i {
+      font-size: 1rem;
+    }
+
+    .tab-btn:hover {
+      color: var(--primary);
+      background: rgba(255,255,255,0.5);
+    }
+
+    .tab-btn.active {
+      background: white;
+      color: var(--primary);
+      box-shadow: 0 4px 12px rgba(30,70,100,0.15);
+    }
+
+    .tab-btn .tab-progress {
+      font-size: 0.65rem;
+      background: var(--primary);
+      color: white;
+      border-radius: 20px;
+      padding: 0.05rem 0.5rem;
+      margin-left: 0.2rem;
+      opacity: 0.85;
+    }
+
+    .tab-btn.active .tab-progress {
+      background: var(--primary-dark);
+    }
+
+    .tab-panel {
+      display: none;
+      animation: fadeIn 0.3s ease;
+    }
+
+    .tab-panel.active {
+      display: block;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ---------- SECTION TITLE ---------- */
+    .section-title {
+      font-size: 1.15rem;
+      font-weight: 700;
+      color: var(--primary-dark);
+      margin: 0.5rem 0 1rem;
+      padding-bottom: 0.6rem;
+      border-bottom: 3px solid var(--primary);
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      flex-wrap: wrap;
+    }
+
+    .section-title i {
+      color: var(--primary);
+    }
+
+    .section-title .section-badge {
+      background: var(--primary);
+      color: white;
+      font-size: 0.68rem;
+      padding: 0.22rem 0.8rem;
+      border-radius: 30px;
+      font-weight: 600;
+      margin-left: auto;
+    }
+
+    .progress-indicator {
+      background: #d0dfe9;
+      border-radius: 40px;
+      padding: 0.35rem 1rem;
+      font-weight: 700;
+      color: var(--primary-dark);
+      font-size: 0.8rem;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+
+    /* ---------- QUESTIONS ---------- */
+    .questions-grid {
+      display: flex;
+      flex-direction: column;
+      gap: 0.9rem;
+      margin: 0.5rem 0 1rem;
+    }
+
+    .question-card {
+      background: white;
+      border-radius: 1.2rem;
+      padding: 1rem 1.1rem;
+      box-shadow: 0 4px 14px rgba(0, 20, 30, 0.06);
+      border: 1px solid var(--border);
+      transition: all 0.2s ease;
+    }
+
+    .question-card:hover {
+      border-color: #9bb8d0;
+      box-shadow: 0 8px 22px rgba(30, 70, 100, 0.08);
+    }
+
+    .q-header {
+      display: flex;
+      align-items: flex-start;
+      gap: 0.7rem;
+      margin-bottom: 0.8rem;
+    }
+
+    .q-num {
+      background: var(--primary);
+      color: white;
+      font-weight: 700;
+      font-size: 0.8rem;
+      min-width: 2.2rem;
+      height: 2.2rem;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 3px 0 var(--primary-dark);
+      flex-shrink: 0;
+    }
+
+    .q-text {
+      font-size: 0.98rem;
+      font-weight: 500;
+      color: var(--text);
+      line-height: 1.45;
+      flex: 1;
+    }
+
+    .options {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.6rem 1.1rem;
+      padding-left: 2.9rem;
+    }
+
+    .option-item {
+      display: flex;
+      align-items: center;
+      gap: 0.45rem;
+      font-size: 0.93rem;
+      color: #1f4256;
+      cursor: pointer;
+      padding: 0.15rem 0.3rem 0.15rem 0;
+      border-radius: 30px;
+    }
+
+    .option-item input[type="radio"] {
+      appearance: none;
+      -webkit-appearance: none;
+      width: 1.05rem;
+      height: 1.05rem;
+      border: 2px solid #6a8fa5;
+      border-radius: 50%;
+      outline: none;
+      cursor: pointer;
+      transition: 0.1s ease;
+      position: relative;
+      flex-shrink: 0;
+    }
+
+    .option-item input[type="radio"]:checked {
+      border-color: var(--primary-light);
+      background: var(--primary-light);
+      box-shadow: inset 0 0 0 3px white;
+    }
+
+    .option-item input[type="radio"]:focus-visible {
+      outline: 2px solid var(--primary);
+      outline-offset: 2px;
+    }
+
+    .option-item label {
+      cursor: pointer;
+      user-select: none;
+      padding-right: 0.3rem;
+    }
+
+    .situational-badge {
+      display: inline-block;
+      background: var(--accent);
+      color: var(--primary-dark);
+      font-size: 0.65rem;
+      font-weight: 700;
+      padding: 0.12rem 0.6rem;
+      border-radius: 30px;
+      margin-left: 0.4rem;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    /* ---------- ACTIONS ---------- */
+    .actions {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      align-items: center;
+      gap: 1rem;
+      margin: 1.2rem 0 0.5rem;
+    }
+
+    .btn {
+      background: var(--primary);
+      color: white;
+      border: none;
+      padding: 0.75rem 2rem;
+      font-size: 1rem;
+      font-weight: 700;
+      border-radius: 60px;
+      cursor: pointer;
+      box-shadow: 0 7px 0 var(--primary-dark), 0 10px 22px rgba(0, 30, 50, 0.2);
+      transition: all 0.08s linear;
+      letter-spacing: 0.3px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+    }
+
+    .btn:active {
+      transform: translateY(4px);
+      box-shadow: 0 3px 0 var(--primary-dark), 0 10px 22px rgba(0, 30, 50, 0.15);
+    }
+
+    .btn:disabled {
+      opacity: 0.5;
+      transform: translateY(4px);
+      box-shadow: 0 3px 0 var(--primary-dark);
+      pointer-events: none;
+    }
+
+    .btn-reset {
+      background: #4f6d7e;
+      box-shadow: 0 6px 0 #2e4655, 0 8px 16px rgba(0, 0, 0, 0.12);
+      font-size: 0.9rem;
+      padding: 0.65rem 1.6rem;
+    }
+
+    .btn-reset:active {
+      box-shadow: 0 2px 0 #2e4655;
+    }
+
+    /* ---------- RESULT SECTION ---------- */
+    .result-section {
+      margin-top: 1.2rem;
+      background: #e8f0f7;
+      border-radius: 1.4rem;
+      padding: 1.2rem 1.4rem;
+      border: 1px solid #b9d0e2;
+    }
+
+    .score-big {
+      font-size: 1.6rem;
+      font-weight: 800;
+      color: #0c3d56;
+      margin-bottom: 0.4rem;
+      display: flex;
+      align-items: center;
+      gap: 0.8rem;
+      flex-wrap: wrap;
+    }
+
+    .score-big i {
+      color: var(--accent);
+    }
+
+    .answer-grid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.35rem 0.9rem;
+      font-family: 'SF Mono', 'Fira Code', monospace;
+      background: white;
+      padding: 0.9rem 1rem;
+      border-radius: 1rem;
+      margin-top: 1rem;
+      border: 1px solid #caddea;
+      font-size: 0.78rem;
+      max-height: 200px;
+      overflow-y: auto;
+    }
+
+    .answer-item {
+      display: inline-block;
+      background: #f0f6fb;
+      padding: 0.15rem 0.55rem;
+      border-radius: 30px;
+      border: 1px solid #b5cfdf;
+      color: #0d3b50;
+      font-weight: 600;
+      white-space: nowrap;
+    }
+
+    .review-item {
+      background: #fdf6f5;
+      border-left: 4px solid var(--danger);
+      border-radius: 10px;
+      padding: 0.8rem 1rem;
+      margin: 0.6rem 0;
+    }
+
+    .review-item .review-q {
+      font-weight: 600;
+      color: var(--text);
+      margin-bottom: 0.25rem;
+      font-size: 0.9rem;
+    }
+
+    .review-item .review-detail {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+    }
+
+    .review-item .review-detail strong {
+      color: var(--success);
+    }
+
+    .review-item .review-detail .your-answer {
+      color: var(--danger);
+      font-weight: 600;
+    }
+
+    .footnote {
+      color: #476e83;
+      font-size: 0.8rem;
+      margin-top: 1rem;
+      text-align: center;
+    }
+
+    /* ---------- CABLE SIMULATOR ---------- */
+    .cable-sim-container {
+      background: white;
+      border-radius: 1.4rem;
+      padding: 1.2rem 1.2rem;
+      margin: 0.5rem 0 1rem;
+      box-shadow: 0 6px 18px rgba(0, 20, 30, 0.06);
+      border: 1px solid var(--border);
+    }
+
+    .sim-controls {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.8rem;
+      align-items: center;
+      margin-bottom: 1rem;
+    }
+
+    .sim-controls label {
+      font-weight: 700;
+      color: var(--text);
+      font-size: 0.85rem;
+      display: flex;
+      align-items: center;
+      gap: 0.3rem;
+    }
+
+    .sim-controls label i {
+      color: var(--primary);
+    }
+
+    .sim-controls select {
+      padding: 0.5rem 1rem;
+      border-radius: 40px;
+      border: 2px solid #b0c4d4;
+      background: #f7fafc;
+      font-size: 0.88rem;
+      color: var(--text);
+      outline: none;
+      cursor: pointer;
+      font-weight: 600;
+    }
+
+    .sim-controls select:focus {
+      border-color: var(--primary);
+    }
+
+    .clear-sim-btn {
+      background: #e67e22;
+      color: white;
+      border: none;
+      padding: 0.55rem 1.2rem;
+      border-radius: 40px;
+      font-weight: 700;
+      font-size: 0.8rem;
+      cursor: pointer;
+      box-shadow: 0 3px 0 #b85e14;
+      transition: all 0.08s;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      margin-left: auto;
+    }
+
+    .clear-sim-btn:active {
+      transform: translateY(2px);
+      box-shadow: 0 1px 0 #b85e14;
+    }
+
+    .wire-palette {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      padding: 0.8rem;
+      background: #f0f6fb;
+      border-radius: 1rem;
+      margin-bottom: 1.2rem;
+      border: 1px solid #d4e2ee;
+      min-height: 50px;
+      align-items: center;
+    }
+
+    .palette-label {
+      width: 100%;
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: var(--text-muted);
+      margin-bottom: 0.2rem;
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+
+    .wire-token {
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      background: white;
+      padding: 0.4rem 0.8rem;
+      border-radius: 40px;
+      border: 2px solid #b0c4d4;
+      cursor: grab;
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: var(--text);
+      transition: all 0.15s;
+      user-select: none;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+    }
+
+    .wire-token:active {
+      cursor: grabbing;
+    }
+
+    .wire-token:hover {
+      border-color: var(--primary);
+      box-shadow: 0 4px 12px rgba(30,70,100,0.15);
+    }
+
+    .wire-token.dragging {
+      opacity: 0.5;
+      transform: scale(0.95);
+    }
+
+    .wire-token.used {
+      opacity: 0.35;
+      pointer-events: none;
+      border-style: dashed;
+    }
+
+    .wire-token .swatch {
+      width: 1.2rem;
+      height: 1.2rem;
+      border-radius: 50%;
+      border: 1px solid #8fa8bb;
+      flex-shrink: 0;
+    }
+
+    .two-col {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+    }
+
+    @media (max-width: 700px) {
+      .two-col {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .rj45-connector {
+      display: flex;
+      flex-direction: column;
+      gap: 0.4rem;
+      background: linear-gradient(180deg, #f5f8fa 0%, #e3ebf2 100%);
+      border-radius: 1rem;
+      padding: 0.9rem;
+      border: 2px solid #a0b8ca;
+    }
+
+    .rj45-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-weight: 800;
+      color: #0c3d56;
+      font-size: 0.9rem;
+      padding-bottom: 0.4rem;
+      border-bottom: 2px solid var(--border);
+    }
+
+    .rj45-header i {
+      color: var(--primary);
+      margin-right: 0.3rem;
+    }
+
+    .rj45-header .end-std {
+      font-size: 0.7rem;
+      background: var(--primary);
+      color: white;
+      padding: 0.15rem 0.6rem;
+      border-radius: 20px;
+    }
+
+    .rj45-body {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.4rem;
+      justify-content: center;
+    }
+
+    .pin-slot {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.25rem;
+      flex: 1 1 60px;
+      min-width: 55px;
+    }
+
+    .pin-label {
+      font-weight: 700;
+      color: var(--primary);
+      font-size: 0.7rem;
+    }
+
+    .pin-dropzone {
+      width: 100%;
+      min-height: 60px;
+      background: white;
+      border: 2px dashed #a0b8ca;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.15s;
+      padding: 0.2rem;
+      cursor: pointer;
+    }
+
+    .pin-dropzone.drag-over {
+      border-color: var(--primary);
+      background: #e8f4fa;
+      transform: scale(1.05);
+    }
+
+    .pin-dropzone.filled {
+      border-style: solid;
+      border-color: #8fa8bb;
+      background: #f7fafc;
+    }
+
+    .pin-dropzone .placed-wire {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.15rem;
+      font-size: 0.6rem;
+      font-weight: 600;
+      color: var(--text);
+      text-align: center;
+      line-height: 1.1;
+    }
+
+    .pin-dropzone .placed-wire .swatch {
+      width: 1.3rem;
+      height: 1.3rem;
+      border-radius: 50%;
+      border: 1px solid #8fa8bb;
+    }
+
+    .pin-dropzone .placeholder-text {
+      color: #a0b8ca;
+      font-size: 0.65rem;
+      font-weight: 600;
+      text-align: center;
+      line-height: 1.1;
+    }
+
+    .cable-tester {
+      margin-top: 1.2rem;
+      background: linear-gradient(180deg, #2c3e50 0%, #1a252f 100%);
+      border-radius: 1rem;
+      padding: 1rem 1.2rem;
+      color: white;
+      border: 2px solid #3d566e;
+    }
+
+    .cable-tester h4 {
+      font-size: 0.95rem;
+      margin-bottom: 0.7rem;
+      color: #bdc3c7;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .cable-tester h4 i {
+      color: #f1c40f;
+    }
+
+    .tester-leds {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.6rem;
+      justify-content: center;
+    }
+
+    .led {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.2rem;
+    }
+
+    .led-circle {
+      width: 2rem;
+      height: 2rem;
+      border-radius: 50%;
+      background: #34495e;
+      border: 2px solid #4a6278;
+      transition: all 0.2s;
+      box-shadow: inset 0 2px 4px rgba(0,0,0,0.3);
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .led-circle .led-icon {
+      font-size: 0.7rem;
+      opacity: 0;
+      transition: opacity 0.2s;
+      color: white;
+    }
+
+    .led-circle.lit {
+      background: #2ecc71;
+      border-color: #27ae60;
+      box-shadow: 0 0 12px rgba(46,204,113,0.8), inset 0 2px 4px rgba(0,0,0,0.1);
+    }
+
+    .led-circle.lit .led-icon {
+      opacity: 1;
+    }
+
+    .led-circle.lit.error {
+      background: #e74c3c;
+      border-color: #c0392b;
+      box-shadow: 0 0 12px rgba(231,76,60,0.8), inset 0 2px 4px rgba(0,0,0,0.1);
+    }
+
+    .led-circle.lit.error .led-icon {
+      opacity: 1;
+    }
+
+    .led-label {
+      font-size: 0.65rem;
+      color: #95a5a6;
+      font-weight: 700;
+    }
+
+    .led-detail {
+      font-size: 0.55rem;
+      color: #7f8c8d;
+      text-align: center;
+      max-width: 60px;
+      line-height: 1.1;
+      margin-top: 0.1rem;
+      min-height: 0.9rem;
+    }
+
+    .test-btn {
+      background: #27ae60;
+      color: white;
+      border: none;
+      padding: 0.6rem 1.6rem;
+      border-radius: 40px;
+      font-weight: 700;
+      font-size: 0.88rem;
+      cursor: pointer;
+      margin-top: 0.9rem;
+      box-shadow: 0 4px 0 #1e8449;
+      transition: all 0.08s;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .test-btn:active {
+      transform: translateY(2px);
+      box-shadow: 0 2px 0 #1e8449;
+    }
+
+    .test-btn:disabled {
+      opacity: 0.5;
+      pointer-events: none;
+    }
+
+    .sim-message {
+      margin-top: 0.7rem;
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: #e0e0e0;
+      text-align: center;
+      min-height: 1.2rem;
+    }
+
+    .sim-legend {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1rem;
+      margin-top: 0.7rem;
+      font-size: 0.72rem;
+      color: #95a5a6;
+    }
+
+    .sim-legend span {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.3rem;
+    }
+
+    .legend-correct i { color: #2ecc71; }
+    .legend-incorrect i { color: #e74c3c; }
+
+    /* ---------- RESPONSIVE ---------- */
+    @media (max-width: 600px) {
+      .quiz-container {
+        padding: 1rem 0.8rem 1.4rem;
+        border-radius: 1.4rem;
+      }
+      .app-header h1 {
+        font-size: 1.2rem;
+      }
+      .tab-btn {
+        min-width: 100px;
+        font-size: 0.75rem;
+        padding: 0.6rem 0.5rem;
+      }
+      .tab-btn i {
+        font-size: 0.85rem;
+      }
+      .options {
+        padding-left: 0.2rem;
+        gap: 0.5rem 0.8rem;
+      }
+      .q-text {
+        font-size: 0.9rem;
+      }
+      .q-num {
+        min-width: 1.8rem;
+        height: 1.8rem;
+        font-size: 0.7rem;
+      }
+      .btn {
+        padding: 0.65rem 1.4rem;
+        font-size: 0.9rem;
+      }
+      .timer-box {
+        font-size: 0.85rem;
+        padding: 0.3rem 0.8rem;
+      }
+      .timer-box span {
+        font-size: 0.85rem;
+      }
+      .score-big {
+        font-size: 1.3rem;
+      }
+      .pin-slot {
+        flex: 1 1 40px;
+        min-width: 40px;
+      }
+      .pin-dropzone {
+        min-height: 48px;
+      }
+      .pin-dropzone .placed-wire {
+        font-size: 0.55rem;
+      }
+      .pin-dropzone .placed-wire .swatch {
+        width: 1rem;
+        height: 1rem;
+      }
+      .led-circle {
+        width: 1.6rem;
+        height: 1.6rem;
+      }
+      .led-detail {
+        font-size: 0.5rem;
+        max-width: 45px;
+      }
+      .sim-controls {
+        gap: 0.5rem;
+      }
+      .clear-sim-btn {
+        margin-left: 0;
+      }
+    }
+
+    .hidden {
+      display: none !important;
+    }
+  </style>
+</head>
+<body>
+  <div class="quiz-container">
+    <!-- HEADER -->
+    <div class="app-header">
+      <h1>
+        <i class="fas fa-book-open"></i>
+        AD-CSS 313
+        <span class="badge"><i class="fas fa-graduation-cap"></i>  Quiz</span>
+      </h1>
+      <div class="header-stats">
+        <div class="timer-box">
+          <i class="fas fa-stopwatch"></i>
+          <span id="timerDisplay">00:00</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB NAVIGATION -->
+    <div class="tab-nav">
+      <button class="tab-btn active" data-tab="tab-mc">
+        <i class="fas fa-list-ol"></i> Part I
+        <span class="tab-progress" id="mcProgress">0/71</span>
+      </button>
+      <button class="tab-btn" data-tab="tab-cable">
+        <i class="fas fa-ethernet"></i> Part II
+        <span class="tab-progress">Sim</span>
+      </button>
+      <button class="tab-btn" data-tab="tab-sit">
+        <i class="fas fa-lightbulb"></i> Part III
+        <span class="tab-progress" id="sitProgress">0/5</span>
+      </button>
+      <button class="tab-btn" data-tab="tab-result">
+        <i class="fas fa-chart-simple"></i> Results
+        <span class="tab-progress" id="resultProgress">—</span>
+      </button>
+    </div>
+
+    <!-- ========== TAB 1: MULTIPLE CHOICE ========== -->
+    <div id="tab-mc" class="tab-panel active">
+      <div class="section-title">
+        <i class="fas fa-pen-to-square"></i> Part I — Multiple Choice
+        <span class="section-badge">71 items</span>
+      </div>
+      <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:0.5rem; margin-bottom:0.5rem;">
+        <div class="progress-indicator"><i class="fas fa-circle-check"></i> <span id="mcAnsweredCount">0 / 71 answered</span></div>
+      </div>
+      <div id="questionsContainer" class="questions-grid"></div>
+    </div>
+
+    <!-- ========== TAB 2: CABLE SIMULATOR ========== -->
+    <div id="tab-cable" class="tab-panel">
+      <div class="section-title">
+        <i class="fas fa-ethernet"></i> Part II — Cable Wiring Simulator
+        <span class="section-badge">T568A / T568B</span>
+      </div>
+
+      <div class="cable-sim-container">
+        <!-- Controls -->
+        <div class="sim-controls">
+          <label for="simStandard"><i class="fas fa-tag"></i> Standard:</label>
+          <select id="simStandard">
+            <option value="T568A">T568A</option>
+            <option value="T568B">T568B</option>
+          </select>
+          <label for="simType"><i class="fas fa-code-branch"></i> Cable Type:</label>
+          <select id="simType">
+            <option value="straight">Straight-Through</option>
+            <option value="crossover">Crossover</option>
+          </select>
+          <button class="clear-sim-btn" id="clearSimBtn"><i class="fas fa-rotate-left"></i> Clear All</button>
+        </div>
+
+        <!-- Wire Palette -->
+        <div class="wire-palette" id="wirePalette">
+          <div class="palette-label"><i class="fas fa-palette"></i> Wire Palette — drag wires into the RJ45 slots below</div>
+        </div>
+
+        <!-- Two connectors side by side -->
+        <div class="two-col">
+          <div class="rj45-connector">
+            <div class="rj45-header">
+              <span><i class="fas fa-plug"></i> End A</span>
+              <span class="end-std" id="endALabel">T568A</span>
+            </div>
+            <div class="rj45-body" id="endABody"></div>
+          </div>
+          <div class="rj45-connector">
+            <div class="rj45-header">
+              <span><i class="fas fa-plug"></i> End B</span>
+              <span class="end-std" id="endBLabel">T568A</span>
+            </div>
+            <div class="rj45-body" id="endBBody"></div>
+          </div>
+        </div>
+
+        <!-- Cable Tester -->
+        <div class="cable-tester">
+          <h4><i class="fas fa-flask"></i> Cable Tester</h4>
+          <div class="tester-leds" id="testerLeds"></div>
+          <div style="text-align:center;">
+            <button class="test-btn" id="testBtn"><i class="fas fa-bolt"></i> Test Cable</button>
+          </div>
+          <div class="sim-message" id="simMessage"></div>
+          <div class="sim-legend">
+            <span class="legend-correct"><i class="fas fa-circle-check"></i> Green = correct connection</span>
+            <span class="legend-incorrect"><i class="fas fa-circle-xmark"></i> Red = incorrect / no connection</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ========== TAB 3: SITUATIONAL ========== -->
+    <div id="tab-sit" class="tab-panel">
+      <div class="section-title">
+        <i class="fas fa-lightbulb"></i> Part III — Situational Questions
+        <span class="section-badge">5 items</span>
+      </div>
+      <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:0.5rem; margin-bottom:0.5rem;">
+        <div class="progress-indicator"><i class="fas fa-circle-check"></i> <span id="sitAnsweredCount">0 / 5 answered</span></div>
+      </div>
+      <div id="situationalContainer" class="questions-grid"></div>
+    </div>
+
+    <!-- ========== TAB 4: RESULTS ========== -->
+    <div id="tab-result" class="tab-panel">
+      <div class="section-title">
+        <i class="fas fa-chart-simple"></i> Results & Review
+        <span class="section-badge">Answer Key</span>
+      </div>
+      <div id="resultSection" class="result-section" style="display:none;">
+        <div class="score-big">
+          <i class="fas fa-trophy"></i>
+          <span>Score:</span>
+          <span id="scoreDisplay">0 / 76</span>
+        </div>
+        <div style="font-weight:600; color:#1b4a61; margin-bottom:0.6rem; display:flex; align-items:center; gap:0.4rem;">
+          <i class="fas fa-key"></i> Answer key (1–71)
+        </div>
+        <div id="answerKeyGrid" class="answer-grid"></div>
+        <div style="margin-top:1.2rem;">
+          <h3 style="font-weight:700; color:#0c3d56; margin-bottom:0.6rem; display:flex; align-items:center; gap:0.4rem;">
+            <i class="fas fa-circle-xmark" style="color:var(--danger);"></i> Incorrect Answers — Review & Learn
+          </h3>
+          <div id="reviewContainer"></div>
+        </div>
+        <div class="footnote"><i class="fas fa-circle-info"></i> Correct answers from the official key</div>
+      </div>
+      <div id="noResultMsg" style="text-align:center; padding:2rem 1rem; color:var(--text-muted);">
+        <i class="fas fa-clipboard-check" style="font-size:2rem; margin-bottom:0.8rem; opacity:0.5;"></i>
+        <p style="font-weight:600;">Submit your answers to see results and review incorrect items.</p>
+      </div>
+    </div>
+
+    <!-- GLOBAL ACTIONS -->
+    <div class="actions" id="globalActions">
+      <button class="btn" id="submitBtn"><i class="fas fa-paper-plane"></i> Submit all answers</button>
+      <button class="btn btn-reset" id="resetBtn"><i class="fas fa-rotate-left"></i> Reset Quiz</button>
+    </div>
+  </div>
+
+  <script>
+    (function() {
+      // ============================================================
+      // DATA: 71 questions
+      // ============================================================
+      const questionsData = [
+        { text: "In Activity 2, which application is used to create the bootable device?", options: ["VirtualBox", "Rufus", "Windows Explorer", "A cable tester"] },
+        { text: "What should you connect to the computer before opening Rufus?", options: ["An RJ45 connector", "A virtual hard disk", "A USB flash drive", "A CPU core"] },
+        { text: "Which version of Rufus does the activity instruct you to open?", options: ["Portable version", "Server version", "Mobile version", "Network version"] },
+        { text: "Where should you confirm that the correct USB drive is selected in Rufus?", options: ["Image option", "Device menu", "Status bar", "Boot menu in VirtualBox"] },
+        { text: "Under which section do you select the downloaded Windows 10 ISO file?", options: ["Device", "Partition scheme", "Boot selection", "Privacy preferences"] },
+        { text: "Which button should you click to choose the ISO file?", options: ["START", "New", "Finish", "SELECT"] },
+        { text: "Which file does the activity tell you to select for boot selection?", options: ["Windows 10 ISO file", "A text document", "A cable-test report", "A virtual machine log"] },
+        { text: "What should the Image option remain set to?", options: ["Custom installation", "Legacy BIOS", "Standard Windows installation", "Virtual Hard Disk Now"] },
+        { text: "Which partition scheme is recommended in the instructions for modern computers using UEFI?", options: ["MBR", "GPT", "RJ45", "NTFS"] },
+        { text: "Which partition scheme is recommended for older computers using Legacy BIOS?", options: ["GPT", "UEFI", "MBR", "T568A"] },
+        { text: "What should you do after selecting the partition scheme in Rufus?", options: ["Click START", "Create a user account", "Crimp the cable", "Set the region"] },
+        { text: "What warning must you accept when starting the process in Rufus?", options: ["The CPU will be removed", "The USB drive's data will be erased", "The ISO will be renamed", "The monitor will turn off"] },
+        { text: "What happens to the USB drive's existing data according to the warning?", options: ["It is backed up automatically", "It is moved to VirtualBox", "It will be erased", "It is converted into RAM"] },
+        { text: "What visual status indicates the Rufus process is complete?", options: ["A red status bar", "A blue cable icon", "A completely green bar showing Ready", "A message saying Install now"] },
+        { text: "What should you do after Rufus displays Ready?", options: ["Leave the USB plugged in indefinitely", "Close the app and safely eject the flash drive", "Delete the ISO file", "Open the cable tester"] },
+        { text: "Why is it important to check the selected device before starting Rufus?", options: ["To ensure the intended USB flash drive is selected", "To choose the Windows edition", "To configure the keyboard", "To create three partitions"] },
+        { text: "Which pair correctly matches a firmware type and its partition scheme from the PDF?", options: ["UEFI—MBR", "Legacy BIOS—GPT", "UEFI—GPT", "T568A—GPT"] },
+        { text: "Which item is selected from the downloaded files for the bootable USB procedure?", options: ["Windows 10 ISO", "VirtualBox license", "User account", "RJ45 connector"] },
+        { text: "Which action is explicitly recommended once the bootable device shows Ready?", options: ["Safely eject the flash drive", "Unwind four twisted pairs", "Allocate 4 GB of RAM", "Create drive E:"] },
+        { text: "Which activity in the PDF focuses on creating a bootable device?", options: ["Activity 2", "Activity 3", "Activity 4", "None of them"] },
+        { text: "Which program is opened to begin creating the virtual machine?", options: ["Rufus", "VirtualBox", "A crimping tool", "A cable tester"] },
+        { text: "What button do you click in VirtualBox to begin creating a virtual machine?", options: ["SELECT", "START", "New", "Install now"] },
+        { text: "What naming format is specified for the virtual machine?", options: ["Windows 10_FirstName", "FirstName_Windows_7", "Virtual_PC_100", "AD-CSS_313"] },
+        { text: "Which installation file should be selected when creating the virtual machine?", options: ["A cable tester file", "The downloaded Windows 10 ISO file", "A CSV file", "A user account file"] },
+        { text: "What is the minimum RAM allocation specified in the activity?", options: ["1 GB (1024 MB)", "2 GB (2048 MB)", "4 GB (4096 MB)", "8 GB (8192 MB)"] },
+        { text: "How many CPU cores does the PDF recommend allocating?", options: ["1 only", "2 to 4", "6 to 8", "10 to 12"] },
+        { text: "Why does the activity recommend allocating 4 GB of RAM and 2-4 CPU cores?", options: ["For smooth performance", "To make the USB data recoverable", "To test cable lights", "To avoid choosing an ISO"] },
+        { text: "Which virtual hard disk option should you choose?", options: ["Use an existing cable", "Create a Virtual Hard Disk Now", "Erase the host computer", "Standard Windows installation"] },
+        { text: "What is the minimum virtual hard disk size specified?", options: ["10 GB", "40 GB", "80 GB", "100 GB"] },
+        { text: "Which button completes the initial virtual machine creation after setting the disk size?", options: ["SELECT", "Finish", "START", "New"] },
+        { text: "After creating the virtual machine, what should you do next?", options: ["Select it and click Start", "Safely eject the computer", "Open Rufus again", "Cut the cable wires"] },
+        { text: "Which settings should you choose at the start of Windows Setup?", options: ["Region, account, and privacy only", "Language, time, and keyboard layout", "RAM, CPU, and disk size", "Cable order and connector orientation"] },
+        { text: "Which button is clicked to begin Windows installation in the setup screen?", options: ["New", "Finish", "Install now", "SELECT"] },
+        { text: "What option should you select if Windows Setup prompts for a product key and you do not have one?", options: ["Enter any key", "I don't have a product key", "Create a virtual hard disk", "Standard Windows installation"] },
+        { text: "What should you do after the product-key prompt, according to the activity?", options: ["Choose a preferred Windows edition", "Crimp the cable", "Change the partition scheme in Rufus", "Close VirtualBox"] },
+        { text: "Which example of a Windows edition is mentioned in the PDF?", options: ["Windows 10 Home", "Windows Server 2025", "Windows XP Professional only", "Android Home"] },
+        { text: "What must you accept during Windows Setup?", options: ["The cable tester result", "The license terms", "The Rufus warning again", "The device menu"] },
+        { text: "Which installation type does the activity instruct you to select?", options: ["Upgrade: Keep files", "Custom: Install Windows only (advanced)", "Standard Windows installation in Rufus", "Portable installation"] },
+        { text: "How many allocated spaces should be created on the virtual drive?", options: ["One", "Two", "Three", "Four"] },
+        { text: "How large should drive C: be in the instructions?", options: ["10 GB", "20 GB", "80 GB", "100 GB"] },
+        { text: "How large should drive D: be in the instructions?", options: ["10 GB", "40 GB", "80 GB", "100 GB"] },
+        { text: "How large should drive E: be in the instructions?", options: ["5 GB", "10 GB", "50 GB", "80 GB"] },
+        { text: "Which set correctly lists the three drive allocations?", options: ["C: 10 GB, D: 80 GB, E: 10 GB", "C: 80 GB, D: 10 GB, E: 10 GB", "C: 100 GB, D: 10 GB, E: 10 GB", "C: 80 GB, D: 80 GB, E: 80 GB"] },
+        { text: "What should you configure by following the on-screen prompts near the end of the activity?", options: ["Region, user account, and privacy preferences", "Cable jacket and copper ends", "GPT and Legacy BIOS", "Rufus status bar"] },
+        { text: "Which activity covers Windows installation using a virtual machine?", options: ["Activity 2", "Activity 3", "Activity 4", "Activity 1"] },
+        { text: "What is VirtualBox used for in Activity 3?", options: ["Creating and running a virtual machine for Windows installation", "Crimping Ethernet cable", "Selecting the RJ45 wire order", "Safely ejecting a USB flash drive"] },
+        { text: "Which setting is measured in MB in the virtual machine setup instructions?", options: ["Hard disk size", "RAM allocation", "Cable length", "Drive letter"] },
+        { text: "What does the PDF specify for the virtual hard disk size?", options: ["At least 100 GB", "Exactly 10 GB", "At most 4 GB", "At least 0.5 inches"] },
+        { text: "Which action comes before selecting the preferred Windows edition?", options: ["Accepting license terms", "Choosing language, time, and keyboard layout and clicking Install now, then handling the product-key prompt", "Testing the finished cable", "Safely ejecting the USB"] },
+        { text: "What is the main focus of Activity 4?", options: ["Creating Windows partitions", "Preparing crossover and straight-through cables", "Installing VirtualBox", "Creating a bootable USB"] },
+        { text: "How much of the outer plastic jacket should be stripped from both cable ends?", options: ["About 0.1 inch", "About 0.5 inch", "About 1 to 2 inches", "About 4 to 5 inches"] },
+        { text: "What should you avoid when stripping the outer jacket?", options: ["Touching the outer jacket", "nicking the inner wires", "Using a cable tester", "Arranging the wires"] },
+        { text: "How many twisted pairs are inside the cable according to the instructions?", options: ["Two", "Three", "Four", "Eight"] },
+        { text: "How many separate wires should be exposed after unwinding the twisted pairs?", options: ["Four", "Six", "Eight", "Sixteen"] },
+        { text: "What should be removed if present inside the cable?", options: ["The copper ends", "The outer jacket entirely", "The inner plastic separator spline or pull string", "The RJ45 gold pins"] },
+        { text: "What should be done to the eight wires before inserting them into the connector?", options: ["Flatten and arrange them in the specified order", "Twist them back into pairs", "Cut them to different lengths", "Cover them with another jacket"] },
+        { text: "What tool or item does the PDF say to use to cut the aligned wires evenly?", options: ["A keyboard", "Scissors", "VirtualBox", "Rufus"] },
+        { text: "How much wire should remain exposed from the outer jacket after cutting?", options: ["About 0.5 inches", "About 1 to 2 feet", "About 4 inches", "About 10 inches"] },
+        { text: "When inserting the RJ45 connector as described, which way should the gold pins face?", options: ["Down", "Up", "Toward the cable jacket only", "Away from the wires"] },
+        { text: "In the described RJ45 orientation, which way should the latch face?", options: ["Up", "Left", "Down", "Toward the gold pins"] },
+        { text: "How far should the wires be pushed into the RJ45 connector?", options: ["Until the copper ends touch the very front", "Only halfway into the connector", "Until the wires are hidden under the jacket", "Until no wire enters the connector"] },
+        { text: "Why should a small part of the outer jacket be inside the connector base?", options: ["For strain relief", "To increase RAM", "To select GPT", "To hold the ISO file"] },
+        { text: "Which tool is used to secure the RJ45 connector to the cable?", options: ["Scissors only", "Crimping tool", "USB flash drive", "Virtual hard disk"] },
+        { text: "Into which slot of the crimping tool should the connector be placed?", options: ["4-pin slot", "6-pin slot", "8-pin slot", "USB slot"] },
+        { text: "How firmly should you squeeze the crimping tool according to the PDF?", options: ["Lightly, without securing it", "Firmly until you hear a click", "Until the cable jacket is cut", "Until the copper ends disappear"] },
+        { text: "What should you do after crimping the first end?", options: ["Repeat the same process for the other end", "Remove all eight wires", "Open VirtualBox", "Reformat the USB"] },
+        { text: "What should you use to verify the finished cable connections?", options: ["A cable tester", "Rufus", "Windows Setup", "A virtual hard disk"] },
+        { text: "What should happen on the tester if all connections are correct, according to the activity?", options: ["All connections light up correctly", "Only one connection lights up", "The status bar turns green and says Ready", "The computer asks for a product key"] },
+        { text: "Which activity includes stripping the jacket, arranging eight wires, and crimping an RJ45 connector?", options: ["Activity 2", "Activity 3", "Activity 4", "All activities equally"] },
+        { text: "Which item is common to both the bootable-device and Windows-installation activities?", options: ["The downloaded Windows 10 ISO file", "The RJ45 connector", "The crimping tool", "The four twisted pairs"] },
+        { text: "Which statement accurately reflects the PDF's cable-testing instruction?", options: ["Test the cable before arranging any wires", "Plug the finished cable into a tester to verify connections", "Use Rufus to test the cable", "A tester is not needed"] }
+      ];
+
+      const situationalQuestions = [
+        { text: "A technician is preparing a bootable USB for a modern UEFI laptop. Which partition scheme should they select in Rufus?", options: ["MBR", "GPT", "Legacy BIOS", "NTFS"] },
+        { text: "While crimping an RJ45 connector, the technician notices the gold pins are facing down. According to the T568A procedure, what should they do?", options: ["Continue crimping", "Flip the connector so gold pins face up", "Use a different crimping tool", "Remove the wires and start over"] },
+        { text: "A user wants to install Windows 10 in VirtualBox but has only 2 GB of RAM available. What does the module recommend?", options: ["Proceed with 2 GB", "Allocate at least 4 GB (4096 MB) for smooth performance", "Use 1 GB instead", "Skip the RAM allocation"] },
+        { text: "After creating a bootable USB with Rufus, the status bar turns completely green and shows 'Ready'. What is the next recommended step?", options: ["Immediately remove the USB without ejecting", "Close Rufus and safely eject the flash drive", "Restart the computer", "Re-run Rufus"] },
+        { text: "A technician is installing Windows 10 in VirtualBox and reaches the product key prompt without a key. What should they select?", options: ["Enter a random key", "I don't have a product key", "Skip the installation", "Create a virtual hard disk"] }
+      ];
+
+      const answerKey = [
+        'B','C','A','B','C','D','A','C','B','C','A','B','C','C','B','A','C','A','A','A',
+        'B','C','A','B','C','B','A','B','D','B','A','B','C','B','A','A','B','B','C','C',
+        'A','B','B','A','B','A','B','A','B','B',
+        'C','B','C','C','C','A','B','A','B','C','A','A','B','C','B','A','A','A','C','A','B'
+      ];
+
+      const situationalKey = ['B','B','B','B','B'];
+
+      // ============================================================
+      // CABLE DATA
+      // ============================================================
+      const t568aColors = [
+        { pin: 1, color: "White / Green", css: "linear-gradient(90deg, white 50%, #2ecc71 50%)" },
+        { pin: 2, color: "Green", css: "#2ecc71" },
+        { pin: 3, color: "White / Orange", css: "linear-gradient(90deg, white 50%, #e67e22 50%)" },
+        { pin: 4, color: "Blue", css: "#3498db" },
+        { pin: 5, color: "White / Blue", css: "linear-gradient(90deg, white 50%, #3498db 50%)" },
+        { pin: 6, color: "Orange", css: "#e67e22" },
+        { pin: 7, color: "White / Brown", css: "linear-gradient(90deg, white 50%, #8B4513 50%)" },
+        { pin: 8, color: "Brown", css: "#8B4513" }
+      ];
+
+      const t568bColors = [
+        { pin: 1, color: "White / Orange", css: "linear-gradient(90deg, white 50%, #e67e22 50%)" },
+        { pin: 2, color: "Orange", css: "#e67e22" },
+        { pin: 3, color: "White / Green", css: "linear-gradient(90deg, white 50%, #2ecc71 50%)" },
+        { pin: 4, color: "Blue", css: "#3498db" },
+        { pin: 5, color: "White / Blue", css: "linear-gradient(90deg, white 50%, #3498db 50%)" },
+        { pin: 6, color: "Green", css: "#2ecc71" },
+        { pin: 7, color: "White / Brown", css: "linear-gradient(90deg, white 50%, #8B4513 50%)" },
+        { pin: 8, color: "Brown", css: "#8B4513" }
+      ];
+
+      const allWireNames = [
+        "White / Green", "Green", "White / Orange", "Orange",
+        "White / Blue", "Blue", "White / Brown", "Brown"
+      ];
+
+      const wireColorMap = {
+        "White / Green": "linear-gradient(90deg, white 50%, #2ecc71 50%)",
+        "Green": "#2ecc71",
+        "White / Orange": "linear-gradient(90deg, white 50%, #e67e22 50%)",
+        "Orange": "#e67e22",
+        "White / Blue": "linear-gradient(90deg, white 50%, #3498db 50%)",
+        "Blue": "#3498db",
+        "White / Brown": "linear-gradient(90deg, white 50%, #8B4513 50%)",
+        "Brown": "#8B4513"
+      };
+
+      // ============================================================
+      // STATE
+      // ============================================================
+      let userAnswers = new Array(71).fill(null);
+      let userSituational = new Array(5).fill(null);
+      let timerInterval = null;
+      let secondsElapsed = 0;
+      let isSubmitted = false;
+
+      let simStandard = 'T568A';
+      let simType = 'straight';
+      let endA = new Array(8).fill(null);
+      let endB = new Array(8).fill(null);
+
+      // DOM refs
+      const container = document.getElementById('questionsContainer');
+      const situationalContainer = document.getElementById('situationalContainer');
+      const timerDisplay = document.getElementById('timerDisplay');
+      const submitBtn = document.getElementById('submitBtn');
+      const resetBtn = document.getElementById('resetBtn');
+      const resultSection = document.getElementById('resultSection');
+      const scoreDisplay = document.getElementById('scoreDisplay');
+      const answerKeyGrid = document.getElementById('answerKeyGrid');
+      const reviewContainer = document.getElementById('reviewContainer');
+      const noResultMsg = document.getElementById('noResultMsg');
+      const mcProgress = document.getElementById('mcProgress');
+      const sitProgress = document.getElementById('sitProgress');
+      const resultProgress = document.getElementById('resultProgress');
+      const mcAnsweredCount = document.getElementById('mcAnsweredCount');
+      const sitAnsweredCount = document.getElementById('sitAnsweredCount');
+
+      // ============================================================
+      // TAB LOGIC
+      // ============================================================
+      document.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+          document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+          btn.classList.add('active');
+          const target = document.getElementById(btn.dataset.tab);
+          if (target) target.classList.add('active');
+          // Auto-show results when opening results tab
+          if (btn.dataset.tab === 'tab-result' && isSubmitted) {
+            resultSection.style.display = 'block';
+            noResultMsg.style.display = 'none';
+          }
+        });
+      });
+
+      // ============================================================
+      // RENDER MC
+      // ============================================================
+      function renderQuestions() {
+        let html = '';
+        questionsData.forEach((q, idx) => {
+          const qNum = idx + 1;
+          const selectedIdx = userAnswers[idx];
+          const optionsHtml = q.options.map((opt, optIdx) => {
+            const letter = String.fromCharCode(65 + optIdx);
+            const checked = (selectedIdx === optIdx) ? 'checked' : '';
+            const inputId = `q${qNum}_opt${optIdx}`;
+            return `
+              <div class="option-item">
+                <input type="radio" name="q${qNum}" id="${inputId}" value="${optIdx}" ${checked} data-qidx="${idx}" data-optidx="${optIdx}">
+                <label for="${inputId}"><strong>${letter}.</strong> ${opt}</label>
+              </div>
+            `;
+          }).join('');
+
+          html += `
+            <div class="question-card" data-qidx="${idx}">
+              <div class="q-header">
+                <div class="q-num">${qNum}</div>
+                <div class="q-text">${q.text}</div>
+              </div>
+              <div class="options">${optionsHtml}</div>
+            </div>
+          `;
+        });
+        container.innerHTML = html;
+      }
+
+      function renderSituational() {
+        let html = '';
+        situationalQuestions.forEach((q, idx) => {
+          const qNum = idx + 1;
+          const selectedIdx = userSituational[idx];
+          const optionsHtml = q.options.map((opt, optIdx) => {
+            const letter = String.fromCharCode(65 + optIdx);
+            const checked = (selectedIdx === optIdx) ? 'checked' : '';
+            const inputId = `sit${qNum}_opt${optIdx}`;
+            return `
+              <div class="option-item">
+                <input type="radio" name="sit${qNum}" id="${inputId}" value="${optIdx}" ${checked} data-sitidx="${idx}" data-optidx="${optIdx}">
+                <label for="${inputId}"><strong>${letter}.</strong> ${opt}</label>
+              </div>
+            `;
+          }).join('');
+
+          html += `
+            <div class="question-card" data-sitidx="${idx}">
+              <div class="q-header">
+                <div class="q-num" style="background:var(--accent); color:var(--primary-dark);">S${qNum}</div>
+                <div class="q-text">${q.text} <span class="situational-badge">Situational</span></div>
+              </div>
+              <div class="options">${optionsHtml}</div>
+            </div>
+          `;
+        });
+        situationalContainer.innerHTML = html;
+      }
+
+      // ============================================================
+      // CABLE SIMULATOR
+      // ============================================================
+      function getStandardColors(std) {
+        return std === 'T568A' ? t568aColors : t568bColors;
+      }
+
+      function getExpectedEndA() {
+        return getStandardColors(simStandard).map(w => w.color);
+      }
+
+      function getExpectedEndB() {
+        if (simType === 'straight') {
+          return getStandardColors(simStandard).map(w => w.color);
+        } else {
+          const otherStd = simStandard === 'T568A' ? 'T568B' : 'T568A';
+          return getStandardColors(otherStd).map(w => w.color);
+        }
+      }
+
+      function renderPalette() {
+        const palette = document.getElementById('wirePalette');
+        const usedA = endA.filter(w => w !== null);
+        const usedB = endB.filter(w => w !== null);
+        const usedCount = {};
+        usedA.forEach(w => usedCount[w] = (usedCount[w] || 0) + 1);
+        usedB.forEach(w => usedCount[w] = (usedCount[w] || 0) + 1);
+
+        let html = '<div class="palette-label"><i class="fas fa-palette"></i> Wire Palette — drag wires into the RJ45 slots below</div>';
+        allWireNames.forEach(wireName => {
+          const used = usedCount[wireName] || 0;
+          const available = used < 2;
+          const swatchCss = wireColorMap[wireName];
+          html += `
+            <div class="wire-token ${!available ? 'used' : ''}" draggable="${available}" data-wire="${wireName}">
+              <span class="swatch" style="background:${swatchCss}"></span>
+              <span>${wireName}</span>
+              <span style="font-size:0.62rem; color:#7f8c8d;">(${used}/2)</span>
+            </div>
+          `;
+        });
+        palette.innerHTML = html;
+
+        palette.querySelectorAll('.wire-token[draggable="true"]').forEach(token => {
+          token.addEventListener('dragstart', handleDragStart);
+          token.addEventListener('dragend', handleDragEnd);
+        });
+      }
+
+      let draggedWire = null;
+
+      function handleDragStart(e) {
+        draggedWire = e.target.dataset.wire;
+        e.target.classList.add('dragging');
+        e.dataTransfer.effectAllowed = 'move';
+        e.dataTransfer.setData('text/plain', draggedWire);
+      }
+
+      function handleDragEnd(e) {
+        e.target.classList.remove('dragging');
+        draggedWire = null;
+        document.querySelectorAll('.pin-dropzone').forEach(dz => dz.classList.remove('drag-over'));
+      }
+
+      function renderConnectors() {
+        const endABody = document.getElementById('endABody');
+        const endBBody = document.getElementById('endBBody');
+
+        let htmlA = '';
+        for (let i = 0; i < 8; i++) {
+          const wire = endA[i];
+          const filled = wire !== null;
+          let inner = filled
+            ? `<div class="placed-wire"><span class="swatch" style="background:${wireColorMap[wire]}"></span><span>${wire}</span></div>`
+            : `<span class="placeholder-text">Drop<br>wire</span>`;
+          htmlA += `
+            <div class="pin-slot">
+              <div class="pin-label">Pin ${i+1}</div>
+              <div class="pin-dropzone ${filled ? 'filled' : ''}" data-end="A" data-pin="${i}">${inner}</div>
+            </div>
+          `;
+        }
+        endABody.innerHTML = htmlA;
+
+        let htmlB = '';
+        for (let i = 0; i < 8; i++) {
+          const wire = endB[i];
+          const filled = wire !== null;
+          let inner = filled
+            ? `<div class="placed-wire"><span class="swatch" style="background:${wireColorMap[wire]}"></span><span>${wire}</span></div>`
+            : `<span class="placeholder-text">Drop<br>wire</span>`;
+          htmlB += `
+            <div class="pin-slot">
+              <div class="pin-label">Pin ${i+1}</div>
+              <div class="pin-dropzone ${filled ? 'filled' : ''}" data-end="B" data-pin="${i}">${inner}</div>
+            </div>
+          `;
+        }
+        endBBody.innerHTML = htmlB;
+
+        document.getElementById('endALabel').textContent = simStandard;
+        document.getElementById('endBLabel').textContent = simType === 'straight'
+          ? simStandard
+          : (simStandard === 'T568A' ? 'T568B' : 'T568A');
+
+        document.querySelectorAll('.pin-dropzone').forEach(dz => {
+          dz.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            e.dataTransfer.dropEffect = 'move';
+            dz.classList.add('drag-over');
+          });
+          dz.addEventListener('dragleave', () => dz.classList.remove('drag-over'));
+          dz.addEventListener('drop', handleDrop);
+          dz.addEventListener('click', () => {
+            const end = dz.dataset.end;
+            const pin = parseInt(dz.dataset.pin, 10);
+            if (end === 'A' && endA[pin] !== null) {
+              endA[pin] = null;
+              renderConnectors();
+              renderPalette();
+              resetLeds();
+              document.getElementById('simMessage').textContent = '';
+            } else if (end === 'B' && endB[pin] !== null) {
+              endB[pin] = null;
+              renderConnectors();
+              renderPalette();
+              resetLeds();
+              document.getElementById('simMessage').textContent = '';
+            }
+          });
+        });
+      }
+
+      function handleDrop(e) {
+        e.preventDefault();
+        const dz = e.currentTarget;
+        dz.classList.remove('drag-over');
+        const end = dz.dataset.end;
+        const pin = parseInt(dz.dataset.pin, 10);
+        const wire = e.dataTransfer.getData('text/plain');
+        if (!wire) return;
+
+        const usedA = endA.filter(w => w !== null);
+        const usedB = endB.filter(w => w !== null);
+        const totalUsed = [...usedA, ...usedB].filter(w => w === wire).length;
+        if (totalUsed >= 2) return;
+
+        if (end === 'A') endA[pin] = wire;
+        else endB[pin] = wire;
+
+        resetLeds();
+        document.getElementById('simMessage').textContent = '';
+        renderConnectors();
+        renderPalette();
+      }
+
+      function resetLeds() {
+        document.querySelectorAll('.led-circle').forEach(el => {
+          el.classList.remove('lit', 'error');
+          const icon = el.querySelector('.led-icon');
+          if (icon) icon.className = 'led-icon fas fa-circle';
+        });
+        document.querySelectorAll('.led-detail').forEach(el => el.textContent = '');
+      }
+
+      function renderTesterLeds() {
+        const ledsContainer = document.getElementById('testerLeds');
+        let html = '';
+        for (let i = 0; i < 8; i++) {
+          html += `
+            <div class="led">
+              <div class="led-circle" data-led="${i}">
+                <i class="led-icon fas fa-circle"></i>
+              </div>
+              <div class="led-label">${i+1}</div>
+              <div class="led-detail" data-leddetail="${i}"></div>
+            </div>
+          `;
+        }
+        ledsContainer.innerHTML = html;
+      }
+
+      function testCable() {
+        const expectedA = getExpectedEndA();
+        const expectedB = getExpectedEndB();
+        const msg = document.getElementById('simMessage');
+        let anyFilled = false;
+        let allCorrect = true;
+        let errors = [];
+
+        for (let i = 0; i < 8; i++) {
+          const led = document.querySelector(`.led-circle[data-led="${i}"]`);
+          const detail = document.querySelector(`.led-detail[data-leddetail="${i}"]`);
+          const icon = led.querySelector('.led-icon');
+          led.classList.remove('lit', 'error');
+          detail.textContent = '';
+
+          const wireA = endA[i];
+          const wireB = endB[i];
+
+          if (wireA === null || wireB === null) {
+            // No wire — LED stays off, show what's missing
+            if (wireA !== null || wireB !== null) {
+              detail.textContent = wireA === null ? `A: missing` : `B: missing`;
+            }
+            allCorrect = false;
+            continue;
+          }
+          anyFilled = true;
+
+          const continuity = wireA === wireB;
+          const standardA = wireA === expectedA[i];
+          const standardB = wireB === expectedB[i];
+
+          if (continuity && standardA && standardB) {
+            led.classList.add('lit');
+            icon.className = 'led-icon fas fa-check';
+            detail.textContent = 'OK';
+          } else {
+            led.classList.add('lit', 'error');
+            icon.className = 'led-icon fas fa-xmark';
+            allCorrect = false;
+            // Build error detail
+            let errParts = [];
+            if (!continuity) errParts.push(`A≠B`);
+            if (!standardA) errParts.push(`A wrong`);
+            if (!standardB) errParts.push(`B wrong`);
+            detail.textContent = errParts.join(', ');
+            errors.push({ pin: i+1, wireA, wireB, expectedA: expectedA[i], expectedB: expectedB[i] });
+          }
+        }
+
+        if (!anyFilled) {
+          msg.innerHTML = '<i class="fas fa-triangle-exclamation"></i> No wires placed yet. Drag wires into the connectors.';
+          msg.style.color = '#f39c12';
+        } else if (allCorrect) {
+          msg.innerHTML = '<i class="fas fa-circle-check"></i> Perfect! All 8 pins are correctly wired for ' + simStandard + ' ' + simType + ' cable.';
+          msg.style.color = '#2ecc71';
+        } else {
+          msg.innerHTML = '<i class="fas fa-circle-xmark"></i> Some pins are incorrect. See red LEDs above for details.';
+          msg.style.color = '#e74c3c';
+        }
+      }
+
+      function clearSimulator() {
+        endA = new Array(8).fill(null);
+        endB = new Array(8).fill(null);
+        resetLeds();
+        document.getElementById('simMessage').textContent = '';
+        renderPalette();
+        renderConnectors();
+      }
+
+      function initSimulator() {
+        renderPalette();
+        renderConnectors();
+        renderTesterLeds();
+
+        document.getElementById('simStandard').addEventListener('change', (e) => {
+          simStandard = e.target.value;
+          clearSimulator();
+          renderConnectors();
+        });
+
+        document.getElementById('simType').addEventListener('change', (e) => {
+          simType = e.target.value;
+          clearSimulator();
+          renderConnectors();
+        });
+
+        document.getElementById('clearSimBtn').addEventListener('click', clearSimulator);
+        document.getElementById('testBtn').addEventListener('click', testCable);
+      }
+
+      // ============================================================
+      // PROGRESS / COUNTERS
+      // ============================================================
+      function updateCounters() {
+        const mcAnswered = userAnswers.filter(a => a !== null).length;
+        const sitAnswered = userSituational.filter(a => a !== null).length;
+        mcAnsweredCount.textContent = `${mcAnswered} / 71 answered`;
+        sitAnsweredCount.textContent = `${sitAnswered} / 5 answered`;
+        mcProgress.textContent = `${mcAnswered}/71`;
+        sitProgress.textContent = `${sitAnswered}/5`;
+        if (isSubmitted) {
+          resultProgress.textContent = '✓';
+        }
+      }
+
+      // ============================================================
+      // EVENT LISTENERS
+      // ============================================================
+      container.addEventListener('change', (e) => {
+        if (!e.target.matches('input[type="radio"]')) return;
+        const qidx = parseInt(e.target.dataset.qidx, 10);
+        const optidx = parseInt(e.target.dataset.optidx, 10);
+        userAnswers[qidx] = optidx;
+        updateCounters();
+      });
+
+      situationalContainer.addEventListener('change', (e) => {
+        if (!e.target.matches('input[type="radio"]')) return;
+        const sitidx = parseInt(e.target.dataset.sitidx, 10);
+        const optidx = parseInt(e.target.dataset.optidx, 10);
+        userSituational[sitidx] = optidx;
+        updateCounters();
+      });
+
+      // ============================================================
+      // TIMER
+      // ============================================================
+      function startTimer() {
+        if (timerInterval) clearInterval(timerInterval);
+        secondsElapsed = 0;
+        timerDisplay.textContent = '00:00';
+        timerInterval = setInterval(() => {
+          secondsElapsed++;
+          const mins = Math.floor(secondsElapsed / 60).toString().padStart(2, '0');
+          const secs = (secondsElapsed % 60).toString().padStart(2, '0');
+          timerDisplay.textContent = `${mins}:${secs}`;
+        }, 1000);
+      }
+
+      function stopTimer() {
+        if (timerInterval) {
+          clearInterval(timerInterval);
+          timerInterval = null;
+        }
+      }
+
+      // ============================================================
+      // SCORE & REVIEW
+      // ============================================================
+      function calculateScore() {
+        let correct = 0;
+        for (let i = 0; i < 71; i++) {
+          if (userAnswers[i] === null) continue;
+          const correctLetter = answerKey[i];
+          const correctIdx = correctLetter.charCodeAt(0) - 65;
+          if (userAnswers[i] === correctIdx) correct++;
+        }
+        for (let i = 0; i < 5; i++) {
+          if (userSituational[i] === null) continue;
+          const correctLetter = situationalKey[i];
+          const correctIdx = correctLetter.charCodeAt(0) - 65;
+          if (userSituational[i] === correctIdx) correct++;
+        }
+        return correct;
+      }
+
+      function buildReview() {
+        let html = '';
+        for (let i = 0; i < 71; i++) {
+          const userAns = userAnswers[i];
+          const correctLetter = answerKey[i];
+          const correctIdx = correctLetter.charCodeAt(0) - 65;
+          if (userAns === null || userAns !== correctIdx) {
+            const q = questionsData[i];
+            const userLetter = userAns !== null ? String.fromCharCode(65 + userAns) : '—';
+            const userText = userAns !== null ? q.options[userAns] : 'Not answered';
+            const correctText = q.options[correctIdx];
+            html += `
+              <div class="review-item">
+                <div class="review-q">Q${i+1}: ${q.text}</div>
+                <div class="review-detail">
+                  Your answer: <span class="your-answer">${userLetter}. ${userText}</span><br>
+                  Correct answer: <strong>${correctLetter}. ${correctText}</strong>
+                </div>
+              </div>
+            `;
+          }
+        }
+        for (let i = 0; i < 5; i++) {
+          const userAns = userSituational[i];
+          const correctLetter = situationalKey[i];
+          const correctIdx = correctLetter.charCodeAt(0) - 65;
+          if (userAns === null || userAns !== correctIdx) {
+            const q = situationalQuestions[i];
+            const userLetter = userAns !== null ? String.fromCharCode(65 + userAns) : '—';
+            const userText = userAns !== null ? q.options[userAns] : 'Not answered';
+            const correctText = q.options[correctIdx];
+            html += `
+              <div class="review-item">
+                <div class="review-q">S${i+1}: ${q.text}</div>
+                <div class="review-detail">
+                  Your answer: <span class="your-answer">${userLetter}. ${userText}</span><br>
+                  Correct answer: <strong>${correctLetter}. ${correctText}</strong>
+                </div>
+              </div>
+            `;
+          }
+        }
+        if (html === '') {
+          html = '<div style="padding:1rem; color:#1b8c4a; font-weight:600;"><i class="fas fa-star"></i> Perfect! No incorrect answers to review.</div>';
+        }
+        reviewContainer.innerHTML = html;
+      }
+
+      function showResults() {
+        if (isSubmitted) return;
+        isSubmitted = true;
+        stopTimer();
+
+        const score = calculateScore();
+        scoreDisplay.textContent = `${score} / 76`;
+        resultSection.style.display = 'block';
+        noResultMsg.style.display = 'none';
+
+        let keyHtml = '';
+        for (let i = 0; i < 71; i++) {
+          keyHtml += `<span class="answer-item">${i+1}. ${answerKey[i]}</span>`;
+        }
+        answerKeyGrid.innerHTML = keyHtml;
+
+        buildReview();
+        updateCounters();
+        resultProgress.textContent = '✓';
+
+        document.querySelectorAll('input[type="radio"]').forEach(radio => radio.disabled = true);
+
+        // Switch to results tab
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+        document.querySelector('.tab-btn[data-tab="tab-result"]').classList.add('active');
+        document.getElementById('tab-result').classList.add('active');
+      }
+
+      function resetQuiz() {
+        stopTimer();
+        isSubmitted = false;
+
+        userAnswers = new Array(71).fill(null);
+        userSituational = new Array(5).fill(null);
+
+        renderQuestions();
+        renderSituational();
+        clearSimulator();
+
+        resultSection.style.display = 'none';
+        noResultMsg.style.display = 'block';
+        answerKeyGrid.innerHTML = '';
+        reviewContainer.innerHTML = '';
+        scoreDisplay.textContent = '0 / 76';
+        resultProgress.textContent = '—';
+
+        document.querySelectorAll('input[type="radio"]').forEach(radio => radio.disabled = false);
+
+        updateCounters();
+        startTimer();
+
+        // Switch back to first tab
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+        document.querySelector('.tab-btn[data-tab="tab-mc"]').classList.add('active');
+        document.getElementById('tab-mc').classList.add('active');
+      }
+
+      // ============================================================
+      // INIT
+      // ============================================================
+      function init() {
+        renderQuestions();
+        renderSituational();
+        initSimulator();
+        updateCounters();
+        startTimer();
+
+        submitBtn.addEventListener('click', showResults);
+        resetBtn.addEventListener('click', resetQuiz);
+      }
+
+      init();
+    })();
+  </script>
+</body>
+</html>
